@@ -133,16 +133,16 @@ class DisconnectButton(Button, Hideable):
         App.get_running_app().disconnect_cube()
 
 
-class SupercubeMain(ScreenManager):
+class BluetoothCubeRoot(ScreenManager):
     pass
 
 
-class SupercubeApp(App):
+class BluetoothCubeApp(App):
     counter = kivy.properties.NumericProperty(0)
     cubelist = kivy.properties.ObjectProperty(None)
 
     def __init__(self):
-        super(SupercubeApp, self).__init__()
+        super(BluetoothCubeApp, self).__init__()
 
         self.cube_scanner = BluetoothCubeScanner()
         self.cube_scanner.bind(on_cube_found=self.on_cube_found)
@@ -165,7 +165,7 @@ class SupercubeApp(App):
         Clock.schedule_once(lambda td: self.start_scan(), 1)
 
     def build(self):
-        return SupercubeMain()
+        return BluetoothCubeRoot()
 
     def start_scan(self):
         print("Starting a scan...")
@@ -336,4 +336,4 @@ class BluetoothCube(kivy.event.EventDispatcher):
 
 
 if __name__ == '__main__':
-    SupercubeApp().run()
+    BluetoothCubeApp().run()

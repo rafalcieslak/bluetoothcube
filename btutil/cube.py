@@ -57,7 +57,8 @@ class BluetoothCubeScanner(kivy.event.EventDispatcher):
 
     class gattCallback(PythonJavaClass):
         __javainterfaces__ = [
-            'org/supercube/BluetoothGattImplem$OnBluetoothGattCallback']
+            'org/cielak/bluetoothcube/'
+            'BluetoothGattImplem$OnBluetoothGattCallback']
         __javacontext__ = 'app'
 
         def __init__(self,
@@ -141,7 +142,7 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
             self.on_gatt_descriptor_write,
             self.on_gatt_characteristic_changed
         )
-        bg = autoclass('org/supercube/BluetoothGattImplem')()
+        bg = autoclass('org/cielak/bluetoothcube/BluetoothGattImplem')()
         bg.setCallback(pycallback)
 
         self.gatt = device.connectGatt(app_context, False, bg)

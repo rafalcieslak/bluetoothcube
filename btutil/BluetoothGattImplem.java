@@ -1,16 +1,14 @@
-package org.supercube;
+package org.cielak.bluetoothcube;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothGattService;
-import android.util.Log;
 
 public class BluetoothGattImplem extends BluetoothGattCallback {
 
       public interface OnBluetoothGattCallback {
-       // ... all the methods from BluetoothGattCallback here ...like:
          void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic);
 
          void onConnectionStateChange(BluetoothGatt gatt, int status, int newState);
@@ -20,10 +18,8 @@ public class BluetoothGattImplem extends BluetoothGattCallback {
          void onCharacteristicRead(BluetoothGatt gatt,BluetoothGattCharacteristic characteristic, int status);
       
     }
-    // private storage for the callback object
     private OnBluetoothGattCallback callback = null;
 
-    // method to set the callback object
     public void setCallback(OnBluetoothGattCallback callback) {
         this.callback = callback;
     }

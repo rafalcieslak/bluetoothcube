@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = Supercube
+title = Bluetooth Cube
 
 # (str) Package name
-package.name = supercube
+package.name = bluetoothcube
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.cielak
