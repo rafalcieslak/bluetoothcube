@@ -24,10 +24,18 @@ def get_app_context():
                 currentActivity.getApplicationContext())
 
 
+class DeviceInfo:
+    def __init__(self, address, name, device):
+        self.address = address
+        self.name = name
+        self.device = device
+
+
 # Searches for a bluetooth cube.
 class BluetoothCubeScanner(kivy.event.EventDispatcher):
     def __init__(self):
         self.register_event_type('on_cube_found')
+        self.register_event_type('on_paired_cube_found')
         super().__init__()
         self.default_adapter = BluetoothAdapter.getDefaultAdapter()
         self.gatt_callback = None
@@ -102,25 +110,30 @@ class BluetoothCubeScanner(kivy.event.EventDispatcher):
 
         name = device.getName()
         if name and (name.startswith("GiC") or name.startswith("GiS")):
-            self.dispatch('on_cube_found', device)
+            self.dispatch('on_cube_found', DeviceInfo(
+                device.getAddress(), device.getName(), device))
 
-    def on_cube_found(self, *args):
+    def on_cube_found(self, deviceinfo):
+        pass
+
+    def on_paired_cube_found(self, deviceinfo):
         pass
 
 
 class BluetoothCubeConnection(kivy.event.EventDispatcher):
-    def __init__(self):
+    def __init__(self, deviceinfo):
         self.register_event_type('on_cube_connecting')
         self.register_event_type('on_cube_connecting_failed')
         self.register_event_type('on_cube_connected')
         self.register_event_type('on_cube_disconnected')
         self.register_event_type('on_state_updated')
         super().__init__()
+        self.device = deviceinfo.device
         self.gatt = None
         self.connected = False
         self.cube_init_phase = 0
 
-    def connect(self, device):
+    def connect(self):
         app_context = get_app_context()
 
         self.disconnect()
@@ -134,11 +147,11 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
         bg = autoclass('org/cielak/bluetoothcube/BluetoothGattImplem')()
         bg.setCallback(pycallback)
 
-        self.gatt = device.connectGatt(app_context, False, bg)
+        self.gatt = self.device.connectGatt(app_context, False, bg)
         self.connected = False
 
         self.dispatch('on_cube_connecting',
-                      f"Connecting to {device.getName()}...", 20)
+                      f"Connecting to {self.device.getName()}...", 20)
 
     def disconnect(self):
         if self.gatt:
@@ -168,7 +181,7 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
         print(f"Service discovery: {status}")
         if status == GATT_SUCCESS:
             self.dispatch('on_cube_connecting',
-                          "Setting up communication...", 85)
+                          "Establishing communications...", 85)
             self.enable_notifications()
 
     def on_gatt_descriptor_write(self, gatt, descriptor, status):

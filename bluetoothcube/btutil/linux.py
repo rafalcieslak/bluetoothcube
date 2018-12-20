@@ -1,33 +1,36 @@
 import kivy
 import gatt
-
+from threading import Thread
 
 from kivy.clock import Clock
 
 from bluetoothcube.btutil.const import (
     CUBE_STATE_SERVICE, CUBE_STATE_RESPONSE,
-    CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE,
-    CLIENT_CHARACTERISTIC_UUID)
+    CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE)
+
+
+class DeviceInfo:
+    def __init__(self, address, name, manager):
+        self.address = address
+        self.name = name
+        self.manager = manager
+
+
+def sigint_handler(sig, frame):
+    print("SIGINT, terminating...")
+    kivy.App.get_running_app().stop()
 
 
 # Searches for a bluetooth cube.
 class BluetoothCubeScanner(kivy.event.EventDispatcher, gatt.DeviceManager):
     def __init__(self):
         self.register_event_type('on_cube_found')
+        self.register_event_type('on_paired_cube_found')
         super().__init__(adapter_name='hci0')
         self._main_loop = None
         self.devices_found = set()
 
-    def scan(self):
-        self.devices_found = set()
-        self.start_discovery()
         self.prepare_run()
-        self.run()
-
-    def stop_scan(self):
-        self.stop_discovery()
-        if self._main_loop_schedule:
-            Clock.unschedule(self._main_loop_schedule)
 
     def prepare_run(self):
         """
@@ -58,9 +61,8 @@ class BluetoothCubeScanner(kivy.event.EventDispatcher, gatt.DeviceManager):
         # The GObject loop would eat up our keyboard interrupts, so we rebind
         # SIGINT to the default handler.
         import signal
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        signal.signal(signal.SIGINT, sigint_handler)
 
-    def run(self):
         # schedule the iteration each frame
         self._main_loop_schedule = Clock.schedule_interval(
             self._gobject_iteration, 0)
@@ -71,37 +73,144 @@ class BluetoothCubeScanner(kivy.event.EventDispatcher, gatt.DeviceManager):
             self._main_loop_context.iteration(False)
             loop += 1
 
-    def device_discovered(self, device):
-        # Install extra function for interface compatibility
-        device.getName = lambda: device.alias()
+    def scan(self):
+        self.devices_found = set()
 
+        # Check for already known devices.
+        for device in self.devices():
+            self.device_discovered(device)
+
+        # Await new devices.
+        self.start_discovery()
+
+    def stop_scan(self):
+        self.stop_discovery()
+
+    def device_discovered(self, device):
         if device.mac_address in self.devices_found:
             return
         self.devices_found.add(device.mac_address)
 
-        name = device.getName()
+        name = device.alias()
+        print(f"Device found: {name}")
+        # TODO: Refactor this condition into a shared file
         if name and (name.startswith("GiC") or name.startswith("GiS")):
-            self.dispatch('on_cube_found', device)
+            di = DeviceInfo(device.mac_address, name, self)
+            if device.is_connected():
+                self.dispatch('on_paired_cube_found', di)
+            else:
+                self.dispatch('on_cube_found', di)
 
-    def on_cube_found(self, *args):
+    def on_cube_found(self, deviceinfo):
+        pass
+
+    def on_paired_cube_found(self, deviceinfo):
         pass
 
 
-class BluetoothCubeConnection(kivy.event.EventDispatcher):
-    def __init__(self):
+class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
+    def __init__(self, deviceinfo):
         self.register_event_type('on_cube_connecting')
         self.register_event_type('on_cube_connecting_failed')
         self.register_event_type('on_cube_connected')
         self.register_event_type('on_cube_disconnected')
         self.register_event_type('on_state_updated')
-        super().__init__()
 
-    def connect(self, device):
+        kivy.event.EventDispatcher.__init__(self)
+        gatt.Device.__init__(self, deviceinfo.address, deviceinfo.manager)
 
+    def connect(self):
+        # Again, we customize the connection procedure to make it more
+        # UI-friendly by splitting into parts.
         self.dispatch('on_cube_connecting',
-                      f"Connecting to {device.getName()}...", 20)
+                      f"Connecting to {self.alias()}...", 20)
+
+        self._connect_signals()
+        device = self  # Used by nested local class
+        if not self.is_connected():
+            class AsyncConnector(Thread):
+                def run(self):
+                    device._object.Connect()
+            # Request connection in a separate thread no to block UI.
+            AsyncConnector().start()
+        else:
+            self.connect_succeeded()
 
     def disconnect(self):
+        super().disconnect()
+        print("Disconnected.")
+
+    # Called when connection is successful.
+    def connect_succeeded(self):
+        super().connect_succeeded()
+        self.dispatch('on_cube_connecting',
+                      "Initializing cube...", 55)
+
+    # Called when services get resolved.
+    def services_resolved(self):
+        super().services_resolved()
+        self.dispatch('on_cube_connecting',
+                      "Establishing communications...", 85)
+        self.enable_notifications()
+
+    def enable_notifications(self):
+        # Find services
+        self.cube_state_service = None
+        self.cube_info_service = None
+
+        for service in self.services:
+            if service.uuid == CUBE_STATE_SERVICE:
+                self.cube_state_service = service
+            if service.uuid == CUBE_INFO_SERVICE:
+                self.cube_info_service = service
+
+        if not self.cube_state_service or not self.cube_info_service:
+            self.disconnect()
+            self.dispatch('on_cube_connecting_failed',
+                          "A cube service was not found.")
+            return
+
+        # Find characteristics
+        self.state_response_characteristic = None
+        self.info_request_characteristic = None
+        self.info_response_characteristic = None
+
+        for ch in self.cube_state_service.characteristics:
+            if ch.uuid == CUBE_STATE_RESPONSE:
+                self.state_response_characteristic = ch
+        for ch in self.cube_info_service.characteristics:
+            if ch.uuid == CUBE_INFO_REQUEST:
+                self.info_request_characteristic = ch
+            if ch.uuid == CUBE_INFO_RESPONSE:
+                self.info_response_characteristic = ch
+
+        if not self.state_response_characteristic or \
+           not self.info_request_characteristic or \
+           not self.info_response_characteristic:
+            self.disconnect()
+            self.dispatch('on_cube_connecting_failed',
+                          "A characteristic is not available.")
+            return
+
+        # Enable notifications
+        self.state_response_characteristic.enable_notifications()
+        self.info_response_characteristic.enable_notifications()
+
+        self.dispatch('on_cube_connected')
+
+    # Called when characteristic values change.
+    def characteristic_value_updated(self, characteristic, value):
+        if characteristic.uuid == CUBE_STATE_RESPONSE:
+            self.dispatch('on_state_updated', value)
+        else:
+            print(f"Characteristic {characteristic.uuid} changed!")
+
+    # The usual way of using a gatt.Device is to subclass it and override some
+    # methods. However, since this class is an EventDispatcher so that widgets
+    # can bind to it even before connection is made, we cannot enable the
+    # connection in class' constructor. So we have to hook to the Device using
+    # another way.
+    def _install_callbacks(self):
         pass
 
     def on_cube_connecting(self, *args):

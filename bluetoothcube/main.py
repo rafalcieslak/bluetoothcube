@@ -10,6 +10,10 @@ from bluetoothcube.bluetoothcube import BluetoothCube
 from .ui import CubeButton, BluetoothCubeRoot
 
 
+from kivy.config import Config
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+
+
 class BluetoothCubeApp(App):
     counter = kivy.properties.NumericProperty(0)
     cubelist = kivy.properties.ObjectProperty(None)
@@ -18,15 +22,11 @@ class BluetoothCubeApp(App):
         super(BluetoothCubeApp, self).__init__()
 
         self.cube_scanner = BluetoothCubeScanner()
-        self.cube_scanner.bind(on_cube_found=self.on_cube_found)
+        self.cube_scanner.bind(
+            on_cube_found=self.on_cube_found,
+            on_paired_cube_found=self.on_paired_cube_found)
 
-        self.cube_connection = BluetoothCubeConnection()
-        self.cube_connection.bind(
-            on_cube_connecting=self.on_cube_connecting,
-            on_cube_connecting_failed=self.on_cube_connecting_failed,
-            on_cube_connected=self.on_cube_ready,
-            on_cube_disconnected=self.on_cube_disconnected
-            )
+        self.cube_connection = None
 
         self.cube = BluetoothCube()
         self.cube.bind(on_state_changed=self.on_cube_state_changed)
@@ -39,6 +39,12 @@ class BluetoothCubeApp(App):
 
     def build(self):
         return BluetoothCubeRoot()
+
+    def on_stop(self):
+        # Make sure to disassociate the cube when closing the app.
+        # Otherwise other devices won't connect.
+        if self.cube_connection:
+            self.cube_connection.disconnect()
 
     def start_scan(self):
         print("Starting a scan...")
@@ -53,14 +59,25 @@ class BluetoothCubeApp(App):
         print("Found a GiiKER Cube.")
 
         button = CubeButton()
-        button.button.text = device.getName()
+        button.button.text = device.name
         self.cube_buttons.append(button)
         button.button.bind(
             on_press=lambda b: self.on_cube_button_pressed(device))
         self.root.cubelist.add_widget(button, index=len(self.cube_buttons))
 
-    def on_cube_button_pressed(self, device):
+    def on_paired_cube_found(self, scanner, deviceinfo):
+        print("Found a PAIRED GiiKER Cube.")
+
+        # Do not build UI, connect immediately.
+        self.connect_to_cube(deviceinfo)
+
+    def on_cube_button_pressed(self, deviceinfo):
+        self.connect_to_cube(deviceinfo)
+
+    def connect_to_cube(self, deviceinfo):
         print("Connecting to a cube...")
+
+        self.cube_scanner.stop_scan()
 
         self.root.transition.direction = 'left'
         self.root.current = 'connecting'
@@ -73,8 +90,16 @@ class BluetoothCubeApp(App):
             lambda td:
             self.root.connecting_cancelbutton.show(), 10)
 
-        # Calling this directly would freeze UI for a fraction of a second.
-        Clock.schedule_once(lambda td: self.cube_connection.connect(device))
+        self.cube_connection = BluetoothCubeConnection(deviceinfo)
+        self.cube_connection.bind(
+            on_cube_connecting=self.on_cube_connecting,
+            on_cube_connecting_failed=self.on_cube_connecting_failed,
+            on_cube_connected=self.on_cube_ready,
+            on_cube_disconnected=self.on_cube_disconnected
+            )
+
+        # Calling this directly might freeze UI for a moment
+        Clock.schedule_once(lambda td: self.cube_connection.connect())
 
     def on_cube_connecting(self, connection, message, percent):
         self.root.connecting_label.text = message
