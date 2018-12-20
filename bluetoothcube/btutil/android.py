@@ -1,27 +1,16 @@
 import kivy
 from jnius import autoclass, PythonJavaClass, java_method, cast
 
+from bluetoothcube.btutil.const import (
+    CUBE_STATE_SERVICE, CUBE_STATE_RESPONSE,
+    CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE,
+    CLIENT_CHARACTERISTIC_UUID)
+
 GATT_STATE_CONNECTED = 0x02
 GATT_STATE_DISCONNECTED = 0x00
 GATT_SUCCESS = 0x00
 
 UUID = autoclass('java.util.UUID')
-
-CUBE_STATE_SERVICE = UUID.fromString(
-    "0000aadb-0000-1000-8000-00805f9b34fb")
-CUBE_STATE_RESPONSE = UUID.fromString(
-    "0000aadc-0000-1000-8000-00805f9b34fb")
-
-CUBE_INFO_SERVICE = UUID.fromString(
-    "0000aaaa-0000-1000-8000-00805f9b34fb")
-CUBE_INFO_RESPONSE = UUID.fromString(
-    "0000aaab-0000-1000-8000-00805f9b34fb")
-CUBE_INFO_REQUEST = UUID.fromString(
-    "0000aaac-0000-1000-8000-00805f9b34fb")
-
-
-CLIENT_CHARACTERISTIC_UUID = UUID.fromString(
-    "00002902-0000-1000-8000-00805f9b34fb")
 
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 BluetoothGattDescriptor = autoclass(
@@ -193,7 +182,8 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
 
     def enable_notifications(self):
         # BluetoothGattService
-        self.cube_state_service = self.gatt.getService(CUBE_STATE_SERVICE)
+        self.cube_state_service = self.gatt.getService(
+            UUID.fromString(CUBE_STATE_SERVICE))
         if not self.cube_state_service:
             print("Cube status service not found")
             self.disconnect()
@@ -202,7 +192,8 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
             return
 
         # BluetoothGattService
-        self.cube_info_service = self.gatt.getService(CUBE_INFO_SERVICE)
+        self.cube_info_service = self.gatt.getService(
+            UUID.fromString(CUBE_INFO_SERVICE))
         if not self.cube_info_service:
             print("Cube info service not found")
             self.disconnect()
@@ -212,11 +203,14 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
 
         # BluetoothGattCharacteristic
         self.state_response_characteristic = \
-            self.cube_state_service.getCharacteristic(CUBE_STATE_RESPONSE)
+            self.cube_state_service.getCharacteristic(
+                UUID.fromString(CUBE_STATE_RESPONSE))
         self.info_response_characteristic = \
-            self.cube_info_service.getCharacteristic(CUBE_INFO_REQUEST)
+            self.cube_info_service.getCharacteristic(
+                UUID.fromString(CUBE_INFO_REQUEST))
         self.info_response_characteristic = \
-            self.cube_info_service.getCharacteristic(CUBE_INFO_RESPONSE)
+            self.cube_info_service.getCharacteristic(
+                UUID.fromString(CUBE_INFO_RESPONSE))
         if not self.state_response_characteristic \
            or not self.info_response_characteristic \
            or not self.info_response_characteristic:
@@ -247,11 +241,11 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
 
         # Enable notifications on these particular descriptor.
         state = self.state_response_characteristic.getDescriptor(
-            CLIENT_CHARACTERISTIC_UUID)
+            UUID.fromString(CLIENT_CHARACTERISTIC_UUID))
         state.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
         self.gatt.writeDescriptor(state)
         info = self.info_response_characteristic.getDescriptor(
-            CLIENT_CHARACTERISTIC_UUID)
+            UUID.fromString(CLIENT_CHARACTERISTIC_UUID))
         info.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
         self.gatt.writeDescriptor(info)
 

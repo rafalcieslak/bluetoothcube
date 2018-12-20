@@ -3,7 +3,7 @@ import kivy
 from kivy.app import App
 from kivy.clock import Clock
 
-from bluetoothcube.btutil.cube import (
+from bluetoothcube.btutil import (
     BluetoothCubeScanner, BluetoothCubeConnection)
 
 from bluetoothcube.bluetoothcube import BluetoothCube
