@@ -10,6 +10,8 @@ from kivy.clock import Clock
 
 
 class Hideable:
+    hidden = kivy.properties.BooleanProperty(False)
+
     def hide(self):
         if hasattr(self, 'saved_attrs'):
             return  # Already hidden
@@ -123,3 +125,7 @@ class CubeStateDisplay(BoxLayout, Hideable):
         self.corner_ori.text = corner_ori
         self.edge_pos.text = edge_pos
         self.edge_ori.text = edge_ori
+
+
+class HideableLabel(Label, Hideable):
+    pass

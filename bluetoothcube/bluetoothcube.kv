@@ -8,14 +8,11 @@
         id: button
         size_hint: 0.85, None
         font_size: '50sp'
-        # height: self.texture_size[1] + sp(10)
-        # size: self.texture_size
         height: '80sp'
-        always_relase: True
 
 
 <CubeStateDisplay>:
-    orientation: 'vertical'        
+    orientation: 'vertical'
     corner_pos: corner_pos
     corner_ori: corner_ori
     edge_pos: edge_pos
@@ -43,12 +40,13 @@
         font_size: '20dp'
         height: '22dp'
 
-        
+
 <BluetoothCubeRoot>:
     cubelist: cubelist
     connecting_label: connecting_label
     connecting_progressbar: connecting_progressbar
     connecting_cancelbutton: connecting_cancelbutton
+    disconnectbutton: disconnectbutton
 
     Screen:
         name: "cube-selection"
@@ -69,6 +67,20 @@
                     text: "Scanning for cubes..."
                     font_size: '20sp'
                     height: '20sp'
+
+            HideableLabel:
+                size_hint: 1, None
+                text: "Make sure bluetooth is enabled and\nthat your cube is charged and activated."
+                halign: 'center'
+                font_size: '20sp'
+                height: self.texture_size[1] + dp(20)
+            Button:
+                text: "Continue without a cube"
+                size_hint: 1, None
+                font_size: '20sp'
+                height: self.texture_size[1] + dp(20)
+                on_press: app.continue_without_cube()
+
 
     Screen:
         name: "connecting"
@@ -121,18 +133,19 @@
                 size_hint: 1, None
                 height: '40dp'
                 DisconnectButton:
+                    id: disconnectbutton
                     size_hint: 0.33, 1
                     pos_hint: {'right': self.parent.right}
                     text: "Disconnect cube"
 
             CubeStateDisplay:
-                    
+
             TimeDisplay:
                 time_text_ratio: 0.38
                 size_hint: 1, 1
                 font_size: min(self.width * self.time_text_ratio, self.height * 0.7)
                 text: "0.0"
-                
+
             PrimeButton:
                 size_hint: 1, None
                 id: primebutton
@@ -146,4 +159,3 @@
                 text: "Start" if not app.timer.running else "Stop"
                 font_size: max(dp(40), mm(8))
                 height: self.font_size + dp(15)
-            

@@ -102,6 +102,12 @@ class BluetoothCubeApp(App):
         # Calling this directly might freeze UI for a moment
         Clock.schedule_once(lambda td: self.cube_connection.connect())
 
+    def continue_without_cube(self):
+        self.cube.disable_connection()
+        self.root.disconnectbutton.text = "Connect a cube"
+        self.root.transition.direction = 'left'
+        self.root.current = 'timer'
+
     def on_cube_connecting(self, connection, message, percent):
         self.root.connecting_label.text = message
         self.root.connecting_label.color = [1, 1, 1, 1]
@@ -116,6 +122,7 @@ class BluetoothCubeApp(App):
         print("Cube ready!")
         self.cube.set_connection(self.cube_connection)
 
+        self.root.disconnectbutton.text = "Disconnect cube"
         self.root.transition.direction = 'left'
         self.root.current = 'timer'
 
@@ -124,7 +131,8 @@ class BluetoothCubeApp(App):
         self.start_scan()
 
     def disconnect_cube(self):
-        self.cube_connection.disconnect()
+        if self.cube_connection:
+            self.cube_connection.disconnect()
         self.goto_cube_selection()
 
     def goto_cube_selection(self):

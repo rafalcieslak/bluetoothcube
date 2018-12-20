@@ -65,6 +65,11 @@ class BluetoothCube(kivy.event.EventDispatcher):
         self.cube_state = CubeState()
         self.connection.bind(on_state_updated=self.process_state_update)
 
+    def disable_connection(self):
+        self.cube_state = CubeState()
+        self.connection = None
+        self.solved = self.cube_state.is_solved()
+
     def process_state_update(self, connection, state):
         cube_state = CubeState(state)
 
