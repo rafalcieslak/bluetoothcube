@@ -7,7 +7,8 @@ from bluetoothcube.btutil import (
     BluetoothCubeScanner, BluetoothCubeConnection)
 
 from bluetoothcube.bluetoothcube import BluetoothCube
-from .ui import CubeButton, BluetoothCubeRoot
+from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
+from bluetoothcube.timer import Timer
 
 if kivy.platform == "linux":
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
@@ -32,6 +33,8 @@ class BluetoothCubeApp(App):
 
         self.show_cancel_button = None
         self.cube_buttons = []
+
+        self.timer = Timer(self.cube)
 
         # When the app starts, start a scan.
         Clock.schedule_once(lambda td: self.start_scan(), 1)

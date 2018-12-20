@@ -14,7 +14,6 @@
         always_relase: True
 
 <BluetoothCubeRoot>:
-    timedisplay: timedisplay
     cubelist: cubelist
     connecting_label: connecting_label
     connecting_progressbar: connecting_progressbar
@@ -80,7 +79,6 @@
             
             TimeDisplay:
                 bcolor: 0, 0, 1, 0
-                id: timedisplay
                 size_hint: 1, 1
                 font_size: self.width * 0.25
                 text: "0.0"
@@ -92,18 +90,16 @@
                         size: self.size
         
             PrimeButton:
-                timedisplay: timedisplay
                 size_hint: 1, None
                 id: primebutton
-                text: "Prime" if not timedisplay.primed else "Disarm"
+                text: "Prime" if not app.timer.primed else "Disarm"
                 always_release: True
                 height: '80sp'
                 
             TimerButton:
-                timedisplay: timedisplay
                 size_hint: 1, None
                 id: timerbutton
-                text: "Start" if not timedisplay.running else "Stop"
+                text: "Start" if not app.timer.running else "Stop"
                 always_release: True
                 height: '80sp'
         

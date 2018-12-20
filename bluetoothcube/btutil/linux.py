@@ -3,6 +3,7 @@ import gatt
 from threading import Thread
 
 from kivy.clock import Clock
+from kivy.app import App
 
 from bluetoothcube.btutil.const import (
     CUBE_STATE_SERVICE, CUBE_STATE_RESPONSE,
@@ -18,7 +19,7 @@ class DeviceInfo:
 
 def sigint_handler(sig, frame):
     print("SIGINT, terminating...")
-    kivy.App.get_running_app().stop()
+    App.get_running_app().stop()
 
 
 # Searches for a bluetooth cube.
@@ -145,6 +146,10 @@ class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
         super().connect_succeeded()
         self.dispatch('on_cube_connecting',
                       "Initializing cube...", 55)
+
+        # Maybe services were already resolved?
+        if not self.services and self.is_services_resolved():
+            self.services_resolved()
 
     # Called when services get resolved.
     def services_resolved(self):
