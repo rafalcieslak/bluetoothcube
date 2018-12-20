@@ -1,9 +1,6 @@
 import kivy
 import time
 
-from kivy.app import App
-from kivy.clock import Clock
-
 
 class Timer(kivy.event.EventDispatcher):
     running = kivy.properties.BooleanProperty(False)

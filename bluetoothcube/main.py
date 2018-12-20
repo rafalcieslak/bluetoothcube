@@ -29,7 +29,6 @@ class BluetoothCubeApp(App):
         self.cube_connection = None
 
         self.cube = BluetoothCube()
-        self.cube.bind(on_state_changed=self.on_cube_state_changed)
 
         self.show_cancel_button = None
         self.cube_buttons = []
@@ -122,6 +121,7 @@ class BluetoothCubeApp(App):
 
     def on_cube_disconnected(self, connection):
         self.goto_cube_selection()
+        self.start_scan()
 
     def disconnect_cube(self):
         self.cube_connection.disconnect()
@@ -130,13 +130,3 @@ class BluetoothCubeApp(App):
     def goto_cube_selection(self):
         self.root.transition.direction = 'right'
         self.root.current = 'cube-selection'
-        self.start_scan()
-
-    def on_cube_state_changed(self, cube, new_state):
-        corner_pos, corner_ori, edge_pos, edge_ori = \
-            new_state.get_representation_strings()
-        # TODO: These might be properties.
-        self.root.ids["corner_pos"].text = corner_pos
-        self.root.ids["corner_ori"].text = corner_ori
-        self.root.ids["edge_pos"].text = edge_pos
-        self.root.ids["edge_ori"].text = edge_ori

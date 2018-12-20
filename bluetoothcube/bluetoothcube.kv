@@ -13,12 +13,43 @@
         height: '80sp'
         always_relase: True
 
+
+<CubeStateDisplay>:
+    orientation: 'vertical'        
+    corner_pos: corner_pos
+    corner_ori: corner_ori
+    edge_pos: edge_pos
+    edge_ori: edge_ori
+    size_hint: 1, None
+    height: 4*dp(22)
+    Label:
+        size_hint: 1, None
+        id: corner_pos
+        font_size: '20dp'
+        height: '22dp'
+    Label:
+        size_hint: 1, None
+        id: corner_ori
+        font_size: '20dp'
+        height: '22dp'
+    Label:
+        size_hint: 1, None
+        id: edge_pos
+        font_size: '20dp'
+        height: '22dp'
+    Label:
+        size_hint: 1, None
+        id: edge_ori
+        font_size: '20dp'
+        height: '22dp'
+
+        
 <BluetoothCubeRoot>:
     cubelist: cubelist
     connecting_label: connecting_label
     connecting_progressbar: connecting_progressbar
     connecting_cancelbutton: connecting_cancelbutton
-    
+
     Screen:
         name: "cube-selection"
         BoxLayout:
@@ -32,7 +63,7 @@
                 orientation: 'vertical'
                 id: cubelist
                 size_hint: 1, 1
-        
+
                 Label:
                     size_hint: 1, 1
                     text: "Scanning for cubes..."
@@ -69,69 +100,50 @@
                         size_hint: None, None
                         text: "Cancel"
                         font_size: '20sp'
-                        size: self.texture_size[0] + dp(30), self.texture_size[1] + dp(30), 
-                
-                    
+                        size: self.texture_size[0] + dp(30), self.texture_size[1] + dp(30),
+
+
     Screen:
         name: "timer"
         BoxLayout:
             orientation: 'vertical'
-            
+            bcolor: 0, 0, 1, 0
+
+            canvas.before:
+                Color:
+                    rgba: self.bcolor
+                Rectangle:
+                    pos: self.x - self.parent.x, self.y - self.parent.y
+                    size: self.size
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint: 1, None
+                height: '40dp'
+                DisconnectButton:
+                    size_hint: 0.33, 1
+                    pos_hint: {'right': self.parent.right}
+                    text: "Disconnect cube"
+
+            CubeStateDisplay:
+                    
             TimeDisplay:
-                bcolor: 0, 0, 1, 0
+                time_text_ratio: 0.38
                 size_hint: 1, 1
-                font_size: self.width * 0.25
+                font_size: min(self.width * self.time_text_ratio, self.height * 0.7)
                 text: "0.0"
-                canvas.before:
-                    Color:
-                        rgba: self.bcolor
-                    Rectangle:
-                        pos: self.x - self.parent.x, self.y - self.parent.y
-                        size: self.size
-        
+                
             PrimeButton:
                 size_hint: 1, None
                 id: primebutton
                 text: "Prime" if not app.timer.primed else "Disarm"
-                always_release: True
-                height: '80sp'
-                
+                font_size: max(dp(40), mm(8))
+                height: self.font_size + dp(15)
+
             TimerButton:
                 size_hint: 1, None
                 id: timerbutton
                 text: "Start" if not app.timer.running else "Stop"
-                always_release: True
-                height: '80sp'
-        
-            Label:
-                size_hint: 1, None
-                id: corner_pos
-                font_size: '20dp'
-                height: '22dp'
-            Label:
-                size_hint: 1, None
-                id: corner_ori
-                font_size: '20dp'
-                height: '22dp'
-            Label:
-                size_hint: 1, None
-                id: edge_pos
-                font_size: '20dp'
-                height: '22dp'
-            Label:
-                size_hint: 1, None
-                id: edge_ori
-                font_size: '20dp'
-                height: '22dp'
-            Label:
-                size_hint: 1, None
-                id: moves
-                font_size: '20dp'
-                height: '22dp'
-                
-            DisconnectButton:
-                size_hint: 1, None
-                id: disconnect
-                text: "Disconnect cube"
-                always_release: True
-                height: '40sp'
+                font_size: max(dp(40), mm(8))
+                height: self.font_size + dp(15)
+            

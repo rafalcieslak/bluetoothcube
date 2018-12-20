@@ -1,11 +1,11 @@
 import kivy
-import time
 
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 
 
@@ -24,19 +24,26 @@ class Hideable:
 
 
 class TimerButton(Button):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.timer = App.get_running_app().timer
+        self.just_stopped = False
+
     def on_press(self):
-        timer = App.get_running_app().timer
-        if timer.running:
-            timer.stop()
-        else:
-            timer.start()
+        self.just_stopped = False
+        if self.timer.running:
+            self.timer.stop()
+            self.just_stopped = True
+
+    def on_release(self):
+        if not self.timer.running and not self.just_stopped:
+            self.timer.start()
 
 
 class PrimeButton(Button):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.timer = App.get_running_app().timer
-        # self.timer.bind(primed=on_timer_primed)
 
     def on_press(self):
         if self.timer.primed:
@@ -74,15 +81,21 @@ class TimeDisplay(Label):
         precision = 1 if self.timer.running else 2
         self.text = f"{v:0.{precision}f}"
 
+        if v >= 100:
+            self.time_text_ratio = 0.25
+        else:
+            self.time_text_ratio = 0.38
+
     def update_bg_color(self):
         if self.timer.primed:
-            self.bcolor = [0.4, 0, 0, 1]
+            self.parent.bcolor = [0.4, 0, 0, 1]
         elif self.cube.solved:
-            self.bcolor = [0, 0.4, 0, 1]
+            self.parent.bcolor = [0, 0.4, 0, 1]
         else:
-            self.bcolor = [0, 0, 0, 1]
+            self.parent.bcolor = [0, 0, 0, 1]
 
 
+# Created dynamically as cubes are discovered.
 class CubeButton(AnchorLayout):
     button = kivy.properties.ObjectProperty(None)
 
@@ -94,3 +107,19 @@ class DisconnectButton(Button, Hideable):
 
 class BluetoothCubeRoot(ScreenManager):
     pass
+
+
+class CubeStateDisplay(BoxLayout, Hideable):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.cube = App.get_running_app().cube
+        self.cube.bind(on_state_changed=self.on_cube_state_changed)
+
+    def on_cube_state_changed(self, cube, new_state):
+        corner_pos, corner_ori, edge_pos, edge_ori = \
+            new_state.get_representation_strings()
+
+        self.corner_pos.text = corner_pos
+        self.corner_ori.text = corner_ori
+        self.edge_pos.text = edge_pos
+        self.edge_ori.text = edge_ori

@@ -138,8 +138,13 @@ class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
             self.connect_succeeded()
 
     def disconnect(self):
-        super().disconnect()
-        print("Disconnected.")
+        device = self
+        if self.is_connected():
+            class AsyncDisconnector(Thread):
+                def run(self):
+                    device._object.Disconnect()
+            # Request connection in a separate thread no to block UI.
+            AsyncDisconnector().start()
 
     # Called when connection is successful.
     def connect_succeeded(self):
@@ -150,6 +155,11 @@ class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
         # Maybe services were already resolved?
         if not self.services and self.is_services_resolved():
             self.services_resolved()
+
+    def disconnect_succeeded(self):
+        super().disconnect_succeeded()
+        print("Disconnected.")
+        self.dispatch('on_cube_disconnected')
 
     # Called when services get resolved.
     def services_resolved(self):

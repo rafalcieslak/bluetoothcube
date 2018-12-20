@@ -83,9 +83,6 @@ class BluetoothCube(kivy.event.EventDispatcher):
 
         print(f"{corner_pos}  {corner_ori}  {edge_pos}  {edge_ori}  {moves}")
 
-        root = App.get_running_app().root
-        root.ids["moves"].text = moves
-
         self.cube_state = cube_state
         self.solved = cube_state.is_solved()
         self.dispatch('on_state_changed', self.cube_state)
