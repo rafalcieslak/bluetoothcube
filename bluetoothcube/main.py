@@ -9,9 +9,8 @@ from bluetoothcube.btutil import (
 from bluetoothcube.bluetoothcube import BluetoothCube
 from .ui import CubeButton, BluetoothCubeRoot
 
-
-from kivy.config import Config
-Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+if kivy.platform == "linux":
+    kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 
 class BluetoothCubeApp(App):
