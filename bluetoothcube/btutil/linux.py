@@ -7,7 +7,8 @@ from kivy.app import App
 
 from bluetoothcube.btutil.const import (
     CUBE_STATE_SERVICE, CUBE_STATE_RESPONSE,
-    CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE)
+    CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE,
+    CUBE_INFO_REQUEST_COMMANDS)
 
 
 class DeviceInfo:
@@ -222,6 +223,15 @@ class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
                 lambda td: self.dispatch('on_state_updated', value))
         else:
             print(f"Characteristic {characteristic.uuid} changed!")
+
+    def send_command(self, command):
+        # TODO: At the moment this method only supports single-byte commands.
+        buffer = [0] * 17
+        buffer[0] = command
+        self.info_request_characteristic.write_value(bytes(buffer))
+
+    def reset_cube(self):
+        self.send_command(CUBE_INFO_REQUEST_COMMANDS['RESET_SOLVED'])
 
     # The usual way of using a gatt.Device is to subclass it and override some
     # methods. However, since this class is an EventDispatcher so that widgets

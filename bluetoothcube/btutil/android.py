@@ -4,7 +4,7 @@ from jnius import autoclass, PythonJavaClass, java_method, cast
 from bluetoothcube.btutil.const import (
     CUBE_STATE_SERVICE, CUBE_STATE_RESPONSE,
     CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE,
-    CLIENT_CHARACTERISTIC_UUID)
+    CLIENT_CHARACTERISTIC_UUID, CUBE_INFO_REQUEST_COMMANDS)
 
 GATT_STATE_CONNECTED = 0x02
 GATT_STATE_DISCONNECTED = 0x00
@@ -130,7 +130,8 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
         super().__init__()
         self.device = deviceinfo.device
         self.gatt = None
-        self.connected = False
+        self.connected = False  # Set to true when BLE conn. becomes active
+        self.ready = False  # Set to true when comm channels are initiated
         self.cube_init_phase = 0
 
     def connect(self):
@@ -218,7 +219,7 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
         self.state_response_characteristic = \
             self.cube_state_service.getCharacteristic(
                 UUID.fromString(CUBE_STATE_RESPONSE))
-        self.info_response_characteristic = \
+        self.info_request_characteristic = \
             self.cube_info_service.getCharacteristic(
                 UUID.fromString(CUBE_INFO_REQUEST))
         self.info_response_characteristic = \
@@ -262,7 +263,18 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
         info.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
         self.gatt.writeDescriptor(info)
 
+        self.ready = True
         self.dispatch('on_cube_connected')
+
+    def send_command(self, command):
+        # TODO: At the moment this method only supports single-byte commands.
+        buffer = [0] * 17
+        buffer[0] = command
+        self.info_request_characteristic.setValue(bytes(buffer))
+        self.gatt.writeCharacteristic(self.info_request_characteristic)
+
+    def reset_cube(self):
+        self.send_command(CUBE_INFO_REQUEST_COMMANDS['RESET_SOLVED'])
 
     def on_cube_connecting(self, *args):
         pass

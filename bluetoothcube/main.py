@@ -10,6 +10,7 @@ from bluetoothcube.bluetoothcube import BluetoothCube
 from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
 from bluetoothcube.timer import Timer
 from bluetoothcube.timehistory import TimeHistory
+from kivy.factory import Factory
 
 if kivy.platform == "linux":
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
@@ -142,5 +143,18 @@ class BluetoothCubeApp(App):
         self.root.transition.direction = 'right'
         self.root.current = 'cube-selection'
 
+    # Triggered when the timer records a new time.
     def on_new_time(self, timer, time):
         self.timehistory.add_time(time)
+
+    # Called when used pressed the "reset cube" button.
+    def reset_cube(self, popup=True):
+        if not self.cube_connection:
+            return
+
+        if popup:
+            # Do not actually reset the cube, just show a popup to request user
+            # confirmation.
+            Factory.ResetCubePopup().open()
+        else:
+            self.cube_connection.reset_cube()

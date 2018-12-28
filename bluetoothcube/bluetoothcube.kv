@@ -84,6 +84,39 @@
             height: self.texture_size[1] + dp(10)
 
 
+<ResetCubePopup@Popup>:
+    title: "Reset cube to solved state?"
+    title_size: '20sp'
+    title_align: 'center'
+    auto_dismiss: True
+    size_hint: None, None
+    size: app.root_window.width - dp(40), '250dp'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint: 1, 1
+            text: 'Use this option when your cube has desynchronized. Make sure the cube is solved before reset.'
+            font_size: '20sp'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            height: self.texture_size[1] + dp(20)
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, None
+            height: sp(35) + dp(20)
+            Button:
+                text: 'Cancel'
+                size_hint: 0.5, 1
+                font_size: '25sp'
+                on_release: root.dismiss()
+            Button:
+                text: 'OK, reset cube'
+                size_hint: 0.5, 1
+                font_size: '25sp'
+                on_release: app.reset_cube(popup=False); root.dismiss()
+
+
 <BluetoothCubeRoot>:
     cubelist: cubelist
     connecting_label: connecting_label
@@ -113,8 +146,10 @@
 
             HideableLabel:
                 size_hint: 1, None
-                text: "Make sure bluetooth is enabled and\nthat your cube is charged and activated."
+                text_size: self.width, None
+                text: "Make sure bluetooth is enabled and that your cube is charged and activated."
                 halign: 'center'
+                valign: 'bottom'
                 font_size: '20sp'
                 height: self.texture_size[1] + dp(20)
             Button:
@@ -122,7 +157,7 @@
                 size_hint: 1, None
                 font_size: '20sp'
                 height: self.texture_size[1] + dp(20)
-                on_press: app.continue_without_cube()
+                on_release: app.continue_without_cube()
 
 
     Screen:
@@ -178,8 +213,17 @@
                 DisconnectButton:
                     id: disconnectbutton
                     size_hint: 0.33, 1
-                    pos_hint: {'right': self.parent.right}
                     text: "Disconnect cube"
+                Button:
+                    size_hint: 0.33, 1
+                    text: "Reset cube"
+                    on_release: app.reset_cube()
+                Button:
+                    size_hint: 0.33, 1
+                    text: "Quit"
+                    # We do not implement this method, it's provided by Kivy Application class.
+                    on_release: app.stop()
+
 
             CubeStateDisplay:
 
