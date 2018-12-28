@@ -1,6 +1,8 @@
 import kivy
 import time
 
+from bluetoothcube.common import Time
+
 
 class Timer(kivy.event.EventDispatcher):
     running = kivy.properties.BooleanProperty(False)
@@ -8,7 +10,7 @@ class Timer(kivy.event.EventDispatcher):
     measured_time = kivy.properties.NumericProperty(0.0)
 
     def __init__(self, cube):
-        self.register_event_type('on_new_measurement')
+        self.register_event_type('on_new_time')
         super().__init__()
 
         self.start_time = None
@@ -50,6 +52,8 @@ class Timer(kivy.event.EventDispatcher):
         self.measured_time = time.time() - self.start_time
         self.running = False
 
+        self.dispatch('on_new_time', Time(self.measured_time))
+
     def on_cube_state_changed(self, cube, newstate):
         if self.primed:
             self.start()
@@ -59,5 +63,5 @@ class Timer(kivy.event.EventDispatcher):
             if self.running:
                 self.stop()
 
-    def on_new_measurement(self, measurement):
+    def on_new_time(self, time):
         pass

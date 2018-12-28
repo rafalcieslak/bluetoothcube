@@ -216,7 +216,10 @@ class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
     # Called when characteristic values change.
     def characteristic_value_updated(self, characteristic, value):
         if characteristic.uuid == CUBE_STATE_RESPONSE:
-            self.dispatch('on_state_updated', value)
+            # Dispatch the event from the main event loop, instead of dbus
+            # handler to ensure proper error handling.
+            Clock.schedule_once(
+                lambda td: self.dispatch('on_state_updated', value))
         else:
             print(f"Characteristic {characteristic.uuid} changed!")
 

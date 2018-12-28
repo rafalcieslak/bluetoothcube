@@ -41,6 +41,49 @@
         height: '22dp'
 
 
+<BasicStatsDisplay@BoxLayout>:
+    orientation: 'horizontal'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Ao5"
+            bold: True
+            font_size: '35sp'
+            size_hint: 1, None
+            height: self.texture_size[1] + dp(10)
+        Label:
+            text: "---" if app.timehistory.ao5 is None else str(app.timehistory.ao5)
+            font_size: '35sp'
+            size_hint: 1, None
+            height: self.texture_size[1] + dp(10)
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Ao12"
+            bold: True
+            font_size: '35sp'
+            size_hint: 1, None
+            height: self.texture_size[1] + dp(10)
+        Label:
+            text: "---" if app.timehistory.ao12 is None else str(app.timehistory.ao12)
+            font_size: '35sp'
+            size_hint: 1, None
+            height: self.texture_size[1] + dp(10)
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Ao100"
+            bold: True
+            font_size: '35sp'
+            size_hint: 1, None
+            height: self.texture_size[1] + dp(10)
+        Label:
+            text: "---" if app.timehistory.ao100 is None else str(app.timehistory.ao100)
+            font_size: '35sp'
+            size_hint: 1, None
+            height: self.texture_size[1] + dp(10)
+
+
 <BluetoothCubeRoot>:
     cubelist: cubelist
     connecting_label: connecting_label
@@ -145,6 +188,9 @@
                 size_hint: 1, 1
                 font_size: min(self.width * self.time_text_ratio, self.height * 0.7)
                 text: "0.0"
+
+            BasicStatsDisplay:
+                size_hint: 1, 1
 
             PrimeButton:
                 size_hint: 1, None

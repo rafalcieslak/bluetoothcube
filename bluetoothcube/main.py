@@ -9,13 +9,13 @@ from bluetoothcube.btutil import (
 from bluetoothcube.bluetoothcube import BluetoothCube
 from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
 from bluetoothcube.timer import Timer
+from bluetoothcube.timehistory import TimeHistory
 
 if kivy.platform == "linux":
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 
 class BluetoothCubeApp(App):
-    counter = kivy.properties.NumericProperty(0)
     cubelist = kivy.properties.ObjectProperty(None)
 
     def __init__(self):
@@ -33,7 +33,10 @@ class BluetoothCubeApp(App):
         self.show_cancel_button = None
         self.cube_buttons = []
 
+        self.timehistory = TimeHistory()
+
         self.timer = Timer(self.cube)
+        self.timer.bind(on_new_time=self.on_new_time)
 
         # When the app starts, start a scan.
         Clock.schedule_once(lambda td: self.start_scan(), 1)
@@ -138,3 +141,6 @@ class BluetoothCubeApp(App):
     def goto_cube_selection(self):
         self.root.transition.direction = 'right'
         self.root.current = 'cube-selection'
+
+    def on_new_time(self, timer, time):
+        self.timehistory.add_time(time)
