@@ -3,6 +3,7 @@ import kivy
 from kivy.app import App
 from kivy.vector import Vector
 from kivy.uix.widget import Widget
+from kivy.clock import Clock
 
 from kivy.graphics.vertex_instructions import Rectangle
 from kivy.graphics.context_instructions import Color
@@ -37,16 +38,21 @@ class CubeDisplay(Widget):
         self.bind(pos=self.update_rect,
                   size=self.update_rect)
 
+        self.update_canvas_trigger = Clock.create_trigger(
+            lambda td: self.update_canvas())
+
         App.get_running_app().cube.bind(
             on_state_changed=self.on_cube_state_changed)
 
     def update_rect(self, *args):
-        # TODO: Maybe it's possible to recompute all coordinates without
-        # recreating the canvas. It may be a very complex task, though.
         self.update_canvas()
 
     def update_canvas(self):
         self.canvas.clear()
+
+        # TODO: Maybe it's possible to recompute all coordinates without
+        # recreating the canvas. It may be a very complex task, though.
+
         with self.canvas:
             pos = Vector(self.pos[:2])
             if self.width * 3 > self.height * 4:
@@ -93,4 +99,4 @@ class CubeDisplay(Widget):
 
     def on_cube_state_changed(self, cube, newstate):
         self.face_state = newstate.toFaceCube()
-        self.update_canvas()
+        self.update_canvas_trigger()

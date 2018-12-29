@@ -15,6 +15,8 @@ from kivy.factory import Factory
 if kivy.platform == "linux":
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
+import kociemba
+
 
 class BluetoothCubeApp(App):
     cubelist = kivy.properties.ObjectProperty(None)
@@ -158,3 +160,21 @@ class BluetoothCubeApp(App):
             Factory.ResetCubePopup().open()
         else:
             self.cube_connection.reset_cube()
+
+    def solve(self):
+        cube_str = self.cube.cube_state.toFaceCube().to_String()
+
+        if self.cube.cube_state.is_solved():
+            solution = "Cube is already solved!"
+        else:
+            try:
+                print("Solving...")
+                solution = kociemba.solve(cube_str)
+                print(f"Solution: {solution}")
+            except ValueError as e:
+                print(f"Failed to solve the cube: {str(e)}")
+                return
+
+        solution_popup = Factory.SolutionPopup()
+        solution_popup.ids["solution_label"].text = solution
+        solution_popup.open()

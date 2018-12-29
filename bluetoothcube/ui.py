@@ -125,10 +125,11 @@ class HideableLabel(Label, Hideable):
 class ScrollViewLR(ScrollView):
     def on_scroll_start(self, touch, check_children=True):
         # Translate up/down scroll events to left/right.
-        if touch.button == 'scrollup':
-            touch.button = 'scrollleft'
-        if touch.button == 'scrolldown':
-            touch.button = 'scrollright'
+        if hasattr(touch, 'button'):
+            if touch.button == 'scrollup':
+                touch.button = 'scrollleft'
+            if touch.button == 'scrolldown':
+                touch.button = 'scrollright'
         # Call original implementation.
         super().on_scroll_start(touch, check_children)
 

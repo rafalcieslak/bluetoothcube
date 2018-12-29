@@ -118,6 +118,43 @@
                 on_release: app.reset_cube(popup=False); root.dismiss()
 
 
+<SolutionPopup@Popup>:
+    title: "Solution:"
+    title_size: '20sp'
+    title_align: 'center'
+    auto_dismiss: True
+    size_hint: None, None
+    size: app.root_window.width - dp(40), '250dp'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint: 1, 0.2
+            text: "U - white, F - green"
+            font_size: '20sp'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            height: self.texture_size[1] + dp(20)
+        Label:
+            id: solution_label
+            size_hint: 1, 0.8
+            text: ""
+            font_size: '20sp'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            height: self.texture_size[1] + dp(20)
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, None
+            height: sp(35) + dp(20)
+            Button:
+                text: 'Dismiss'
+                size_hint: 0.5, 1
+                font_size: '25sp'
+                on_release: root.dismiss()
+
+
 <BluetoothCubeRoot>:
     cubelist: cubelist
     connecting_label: connecting_label
@@ -221,9 +258,8 @@
                     on_release: app.reset_cube()
                 Button:
                     size_hint: 0.33, 1
-                    text: "Quit"
-                    # We do not implement this method, it's provided by Kivy Application class.
-                    on_release: app.stop()
+                    text: "Solve"
+                    on_release: app.solve()
 
             BoxLayout:
                 size_hint: 1, None
