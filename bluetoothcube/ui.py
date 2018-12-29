@@ -111,20 +111,14 @@ class DisconnectButton(Button, Hideable):
         App.get_running_app().disconnect_cube()
 
 
-class CubeStateDisplay(BoxLayout, Hideable):
+class CubeStateDisplay(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.cube = App.get_running_app().cube
         self.cube.bind(on_state_changed=self.on_cube_state_changed)
 
     def on_cube_state_changed(self, cube, new_state):
-        corner_pos, corner_ori, edge_pos, edge_ori = \
-            new_state.get_representation_strings()
-
-        self.corner_pos.text = corner_pos
-        self.corner_ori.text = corner_ori
-        self.edge_pos.text = edge_pos
-        self.edge_ori.text = edge_ori
+        self.text = '\n'.join(new_state.get_representation_strings())
 
 
 class HideableLabel(Label, Hideable):

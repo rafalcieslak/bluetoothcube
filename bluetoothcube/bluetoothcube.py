@@ -38,11 +38,10 @@ class BluetoothCube(kivy.event.EventDispatcher):
         move4 = (MOVES[(state[19] >> 4) & 0x0F] +
                  ("" if (state[19] & 0x0F) == 1 else "'"))
 
-        corner_pos, corner_ori, edge_pos, edge_ori = \
-            cube_state.get_representation_strings()
+        s = '  '.join(cube_state.get_representation_strings())
         moves = f"{move4} {move3} {move2} {move1}"
 
-        print(f"{corner_pos}  {corner_ori}  {edge_pos}  {edge_ori}  {moves}")
+        print(f"{s}  {moves}")
 
         self.cube_state = cube_state
         self.solved = cube_state.is_solved()

@@ -12,33 +12,11 @@
 
 
 <CubeStateDisplay>:
-    orientation: 'vertical'
-    corner_pos: corner_pos
-    corner_ori: corner_ori
-    edge_pos: edge_pos
-    edge_ori: edge_ori
-    size_hint: 1, None
-    height: 4*dp(22)
-    Label:
-        size_hint: 1, None
-        id: corner_pos
-        font_size: '20dp'
-        height: '22dp'
-    Label:
-        size_hint: 1, None
-        id: corner_ori
-        font_size: '20dp'
-        height: '22dp'
-    Label:
-        size_hint: 1, None
-        id: edge_pos
-        font_size: '20dp'
-        height: '22dp'
-    Label:
-        size_hint: 1, None
-        id: edge_ori
-        font_size: '20dp'
-        height: '22dp'
+    font_size: '20dp'
+    height: '100dp'
+    text_size: self.size
+    valign: 'top'
+    halign: 'center'
 
 
 <BasicStatsDisplay@BoxLayout>:
@@ -252,10 +230,10 @@
                 orientation: 'horizontal'
                 height: cubedisplay.height
                 CubeStateDisplay:
-                    size_hint: 0.5, None
+                    size_hint: 0.33, 1
                 CubeDisplay:
                     id: cubedisplay
-                    size_hint: 0.5, None
+                    size_hint: 0.66, None
                     height: '200dp'
 
 
