@@ -43,19 +43,25 @@
 
 <BasicStatsDisplay@BoxLayout>:
     orientation: 'horizontal'
+    height: ao5_b.height
     BoxLayout:
+        id: ao5_b
         orientation: 'vertical'
+        size_hint: 1, None
+        height: ao5_l1.height + ao5_l2.height
         Label:
+            id: ao5_l1
             text: "Ao5"
             bold: True
             font_size: '35sp'
             size_hint: 1, None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1] + dp(5)
         Label:
+            id: ao5_l2
             text: "---" if app.timehistory.ao5 is None else str(app.timehistory.ao5)
             font_size: '35sp'
             size_hint: 1, None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1] + dp(5)
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -63,12 +69,12 @@
             bold: True
             font_size: '35sp'
             size_hint: 1, None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1] + dp(5)
         Label:
             text: "---" if app.timehistory.ao12 is None else str(app.timehistory.ao12)
             font_size: '35sp'
             size_hint: 1, None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1] + dp(5)
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -76,13 +82,30 @@
             bold: True
             font_size: '35sp'
             size_hint: 1, None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1] + dp(5)
         Label:
             text: "---" if app.timehistory.ao100 is None else str(app.timehistory.ao100)
             font_size: '35sp'
             size_hint: 1, None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1] + dp(5)
 
+<RecentTimes@FloatLayout>:
+    height: scroll.height
+    ScrollViewLR:
+        id: scroll
+        size_hint: 0.92, 1
+        pos_hint: {'x': 0.04, 'y': 0}
+        height: label.height
+        do_scroll_y: False
+        #:import ScrollEffect kivy.effects.scroll.ScrollEffect
+        effect_cls: ScrollEffect
+        Label:
+            id: label
+            size_hint_x: None
+            text: app.timehistory.recent_solves_text
+            font_size: '20dp'
+            size: self.texture_size[0], self.texture_size[1] + dp(10)
+            halign: 'left'
 
 <ResetCubePopup@Popup>:
     title: "Reset cube to solved state?"
@@ -224,7 +247,6 @@
                     # We do not implement this method, it's provided by Kivy Application class.
                     on_release: app.stop()
 
-
             CubeStateDisplay:
 
             TimeDisplay:
@@ -233,8 +255,11 @@
                 font_size: min(self.width * self.time_text_ratio, self.height * 0.7)
                 text: "0.0"
 
+            RecentTimes:
+                size_hint: 1, None
+
             BasicStatsDisplay:
-                size_hint: 1, 1
+                size_hint: 1, None
 
             PrimeButton:
                 size_hint: 1, None

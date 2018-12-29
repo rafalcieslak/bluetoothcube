@@ -14,6 +14,8 @@ class TimeHistory(kivy.event.EventDispatcher):
     ao100 = kivy.properties.ObjectProperty(
         None, allownone=True, force_dispatch=True)
 
+    recent_solves_text = kivy.properties.StringProperty("")
+
     def __init__(self):
         self.data = []
 
@@ -28,6 +30,13 @@ class TimeHistory(kivy.event.EventDispatcher):
         self.ao5 = self.get_aon(5)
         self.ao12 = self.get_aon(12)
         self.ao100 = self.get_aon(100)
+
+        if len(self.data) == 0:
+            self.recent_solves_text = ''
+        else:
+            T = reversed(self.data[-10:])
+            self.recent_solves_text = (
+                '  '.join(str(t) for t in T))
 
     # Computes average of N solves using competition rules.
     def get_aon(self, N) -> Optional[Time]:

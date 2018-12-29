@@ -7,6 +7,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
+from kivy.uix.scrollview import ScrollView
 
 
 class Hideable:
@@ -130,3 +131,15 @@ class CubeStateDisplay(BoxLayout, Hideable):
 
 class HideableLabel(Label, Hideable):
     pass
+
+
+# A scrollview that makes mouse wheel up/down events behave like left/right.
+class ScrollViewLR(ScrollView):
+    def on_scroll_start(self, touch, check_children=True):
+        # Translate up/down scroll events to left/right.
+        if touch.button == 'scrollup':
+            touch.button = 'scrollleft'
+        if touch.button == 'scrolldown':
+            touch.button = 'scrollright'
+        # Call original implementation.
+        super().on_scroll_start(touch, check_children)
