@@ -1,10 +1,14 @@
 import kivy
 
+from kivy.app import App
 from kivy.vector import Vector
 from kivy.uix.widget import Widget
 
 from kivy.graphics.vertex_instructions import Rectangle
 from kivy.graphics.context_instructions import Color
+
+from kociemba.pykociemba.facecube import FaceCube
+
 
 STICKERS = {
     'green': [0.33, 0.6, 0.5],
@@ -12,16 +16,29 @@ STICKERS = {
     'blue': [0.66, 0.6, 0.6],
     'orange': [0.1, 0.85, 0.85],
     'white': [0, 0, 0.85],
-    'yellow': [0.16, 0.8, 0.8]}
+    'yellow': [0.16, 0.8, 0.8]
+}
+
+# TODO: This might be user-configurable.
+STICKER_COLOR = {
+    0: 'white', 3: 'yellow',
+    1: 'red', 4: 'orange',
+    2: 'green', 5: 'blue',
+}
 
 
 class CubeDisplay(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.face_state = FaceCube()
         self.update_canvas()
 
         self.bind(pos=self.update_rect,
                   size=self.update_rect)
+
+        App.get_running_app().cube.bind(
+            on_state_changed=self.on_cube_state_changed)
 
     def update_rect(self, *args):
         # TODO: Maybe it's possible to recompute all coordinates without
@@ -47,29 +64,33 @@ class CubeDisplay(Widget):
             def face(x, y):
                 return origin + face_v * (x, y)
 
-            # F-face
-            Color(hsv=STICKERS['green'])
-            Rectangle(pos=face(1, 0), size=face_v)
+            def draw_face(o, n):
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 0]]])
+                Rectangle(pos=o+(sticker_v*(0, 2)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 1]]])
+                Rectangle(pos=o+(sticker_v*(1, 2)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 2]]])
+                Rectangle(pos=o+(sticker_v*(2, 2)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 3]]])
+                Rectangle(pos=o+(sticker_v*(0, 1)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 4]]])
+                Rectangle(pos=o+(sticker_v*(1, 1)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 5]]])
+                Rectangle(pos=o+(sticker_v*(2, 1)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 6]]])
+                Rectangle(pos=o+(sticker_v*(0, 0)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 7]]])
+                Rectangle(pos=o+(sticker_v*(1, 0)), size=sticker_v)
+                Color(hsv=STICKERS[STICKER_COLOR[self.face_state.f[n + 8]]])
+                Rectangle(pos=o+(sticker_v*(2, 0)), size=sticker_v)
 
-            # U-face
-            Color(hsv=STICKERS['white'])
-            Rectangle(pos=face(1, 1), size=face_v)
+            draw_face(face(1, 2), 0 * 9)  # U
+            draw_face(face(2, 1), 1 * 9)  # R
+            draw_face(face(1, 1), 2 * 9)  # F
+            draw_face(face(1, 0), 3 * 9)  # D
+            draw_face(face(0, 1), 4 * 9)  # L
+            draw_face(face(3, 1), 5 * 9)  # B
 
-            # L-face
-            Color(hsv=STICKERS['orange'])
-            Rectangle(pos=face(0, 1), size=face_v)
-
-            # B-face
-            Color(hsv=STICKERS['blue'])
-            Rectangle(pos=face(1, 2), size=face_v)
-
-            # L-face
-            Color(hsv=STICKERS['red'])
-            Rectangle(pos=face(2, 1), size=face_v)
-
-            # D-face
-            Color(hsv=STICKERS['yellow'])
-            Rectangle(pos=face(3, 1), size=face_v)
-
-    def apply_cube_state(self, newstate):
-        pass
+    def on_cube_state_changed(self, cube, newstate):
+        self.face_state = newstate.toFaceCube()
+        self.update_canvas()

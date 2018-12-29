@@ -36,7 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy
+requirements = python3,kivy,kociemba
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -94,10 +94,10 @@ android.api = 21
 android.minapi = 21
 
 # (int) Android SDK version to use
-android.sdk = 24
+android.sdk = 20
 
 # (str) Android NDK version to use
-android.ndk = 18b
+android.ndk = 14b
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
@@ -136,7 +136,7 @@ android.skip_update = True
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-android.add_src = btutil/BluetoothGattImplem.java
+android.add_src = bluetoothcube/btutil/BluetoothGattImplem.java
 
 # (list) Android AAR archives to add (currently works only with sdl2_gradle
 # bootstrap)
@@ -151,6 +151,8 @@ android.add_src = btutil/BluetoothGattImplem.java
 
 # (str) python-for-android branch to use, defaults to stable
 p4a.branch = master
+
+p4a.local_recipes = ./p4a-recipes
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
