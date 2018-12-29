@@ -9,6 +9,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from kivy.uix.scrollview import ScrollView
 
+from bluetoothcube.cubedisplay import CubeDisplay  # noqa: F401
+
 
 class Hideable:
     hidden = kivy.properties.BooleanProperty(False)
@@ -109,10 +111,6 @@ class DisconnectButton(Button, Hideable):
         App.get_running_app().disconnect_cube()
 
 
-class BluetoothCubeRoot(ScreenManager):
-    pass
-
-
 class CubeStateDisplay(BoxLayout, Hideable):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -143,3 +141,7 @@ class ScrollViewLR(ScrollView):
             touch.button = 'scrollright'
         # Call original implementation.
         super().on_scroll_start(touch, check_children)
+
+
+class BluetoothCubeRoot(ScreenManager):
+    pass

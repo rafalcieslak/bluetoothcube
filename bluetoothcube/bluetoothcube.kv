@@ -247,7 +247,19 @@
                     # We do not implement this method, it's provided by Kivy Application class.
                     on_release: app.stop()
 
-            CubeStateDisplay:
+            BoxLayout:
+                size_hint: 1, None
+                orientation: 'horizontal'
+                height: cubestatedisplay.height
+                # CubeStateDisplay:
+                #    id: cubestatedisplay
+                #     size_hint: 0.5, None
+                CubeDisplay:
+                    id: cubestatedisplay
+                    size_hint: 0.5, None
+                    height: '200dp'
+
+
 
             TimeDisplay:
                 time_text_ratio: 0.38
