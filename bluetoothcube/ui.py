@@ -57,7 +57,7 @@ class PrimeButton(Button):
             self.timer.prime()
 
 
-# Uses both cube and timer to display measured time and cube solved state.
+# Uses the timer to display measured time.
 class TimeDisplay(Label):
     bcolor = kivy.properties.ListProperty([1, 1, 1, 1])
 
@@ -65,8 +65,6 @@ class TimeDisplay(Label):
         super().__init__(**kwargs)
         self.updateevent = None
         self.cube = App.get_running_app().cube
-        self.cube.bind(
-            solved=lambda c, n: self.update_bg_color())
         self.timer = App.get_running_app().timer
         self.timer.bind(
             running=self.on_timer_running_changed,
@@ -94,8 +92,6 @@ class TimeDisplay(Label):
     def update_bg_color(self):
         if self.timer.primed:
             self.parent.bcolor = [0.4, 0, 0, 1]
-        elif self.cube.solved:
-            self.parent.bcolor = [0, 0.4, 0, 1]
         else:
             self.parent.bcolor = [0, 0, 0, 1]
 
