@@ -1,7 +1,12 @@
+import os
 import kivy
 
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.factory import Factory
+from kivy.metrics import Metrics
+
+import kociemba
 
 from bluetoothcube.btutil import (
     BluetoothCubeScanner, BluetoothCubeConnection)
@@ -10,12 +15,11 @@ from bluetoothcube.bluetoothcube import BluetoothCube
 from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
 from bluetoothcube.timer import Timer
 from bluetoothcube.timehistory import TimeHistory
-from kivy.factory import Factory
 
 if kivy.platform == "linux":
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
-
-import kociemba
+    kivy.config.Config.set('graphics', 'width', 660)
+    kivy.config.Config.set('graphics', 'height', 1000)
 
 
 class BluetoothCubeApp(App):
