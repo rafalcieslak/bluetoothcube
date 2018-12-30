@@ -17,8 +17,12 @@ from bluetoothcube.timehistory import TimeHistory
 
 if kivy.platform == "linux":
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
-    kivy.config.Config.set('graphics', 'width', 660)
-    kivy.config.Config.set('graphics', 'height', 1000)
+    # If using default window size...
+    if kivy.Config.get('graphics', 'width') == '800' \
+       and kivy.Config.get('graphics', 'height') == '600':
+        # Switch to a nicer shape
+        kivy.config.Config.set('graphics', 'width', '660')
+        kivy.config.Config.set('graphics', 'height', '1000')
 
 
 class BluetoothCubeApp(App):
