@@ -4,7 +4,6 @@ import kivy
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.factory import Factory
-from kivy.metrics import Metrics
 
 import kociemba
 

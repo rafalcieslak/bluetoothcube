@@ -12,8 +12,12 @@ from kivy.uix.scrollview import ScrollView
 from bluetoothcube.cubedisplay import CubeDisplay  # noqa: F401
 
 
-class Hideable:
+class Hideable(kivy.event.EventDispatcher):
     hidden = kivy.properties.BooleanProperty(False)
+
+    def __init__(self):
+        super().__init__()
+        self.bind(hidden=lambda w, v: self.hide() if v else self.show())
 
     def hide(self):
         if hasattr(self, 'saved_attrs'):
@@ -64,12 +68,15 @@ class TimeDisplay(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.updateevent = None
-        self.cube = App.get_running_app().cube
-        self.timer = App.get_running_app().timer
-        self.timer.bind(
+        app = App.get_running_app()
+        app.timer.bind(
             running=self.on_timer_running_changed,
             primed=lambda timer, primed: self.update_bg_color()
         )
+        app.timehistory.bind(
+            on_time_invalidated=lambda w: self.clear())
+
+        self.timer = app.timer
 
     def on_timer_running_changed(self, timer, running):
         if running:
@@ -94,6 +101,9 @@ class TimeDisplay(Label):
             self.parent.bcolor = [0.4, 0, 0, 1]
         else:
             self.parent.bcolor = [0, 0, 0, 1]
+
+    def clear(self):
+        self.text = "0.0"
 
 
 # Created dynamically as cubes are discovered.
@@ -121,6 +131,10 @@ class HideableLabel(Label, Hideable):
     pass
 
 
+class HideableButton(Button, Hideable):
+    pass
+
+
 # A scrollview that makes mouse wheel up/down events behave like left/right.
 class ScrollViewLR(ScrollView):
     def on_scroll_start(self, touch, check_children=True):
@@ -132,6 +146,11 @@ class ScrollViewLR(ScrollView):
                 touch.button = 'scrollright'
         # Call original implementation.
         super().on_scroll_start(touch, check_children)
+
+
+class LastTime(BoxLayout):
+    lt = kivy.properties.ObjectProperty(
+        None, allownone=True, force_dispatch=True)
 
 
 class BluetoothCubeRoot(ScreenManager):
