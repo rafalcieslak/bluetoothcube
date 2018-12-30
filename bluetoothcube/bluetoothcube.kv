@@ -90,49 +90,50 @@
     height: max(timelabel.height, deletebutton.height)
     lt: app.timehistory.last_time
     Widget:
-        size_hint: 0.15, None
+        size_hint: 0.1, None
     Label:
         size_hint: None, 1
         text: "Last time: "
-        font_size: '25sp'
+        font_size: '20sp'
         size: self.texture_size[0], self.texture_size[1] + sp(10)
     Label:
         id: timelabel
         size_hint: None, 1
         text: "N/A" if root.lt is None else str(root.lt)
-        font_size: '35dp'
-        width: self.texture_size[0] + sp(50)
+        font_size: '30dp'
+        width: max(self.texture_size[0] + sp(20), sp(120))
         height: self.texture_size[1] + sp(10)
     HideableButton:
         hidden: root.lt is None
         size_hint: None, 1
         background_color: [1, 1, 1, 1] if root.lt is None or not root.lt.is_p2() else [1.8, 0, 0, 1]
         text: "+2"
-        font_size: '28sp'
+        font_size: '20sp'
         on_release: app.timehistory.mark_last_time('+2')
-        width: deletebutton.width
+        width: dnfbutton.width
         height: self.texture_size[1] + sp(10)
     HideableButton:
+        id: dnfbutton
         hidden: root.lt is None
         size_hint: None, 1
         background_color: [1, 1, 1, 1] if root.lt is None or not root.lt.is_dnf() else [1.8, 0, 0, 1]
         text: "DNF"
-        font_size: '28sp'
+        font_size: '20sp'
         on_release: app.timehistory.mark_last_time('DNF')
-        width: deletebutton.width
+        width: self.texture_size[0] + sp(20)
         height: self.texture_size[1] + sp(10)
     HideableButton:
         id: deletebutton
         hidden: root.lt is None
         size_hint: None, 1
-        text: "Delete"
-        font_size: '28sp'
-        width: self.texture_size[0] + sp(20)
+        text: "X"
+        font_size: '20sp'
+        width: dnfbutton.width
         height: self.texture_size[1] + sp(10)
         # TODO: Confirmation popup
         on_release: app.timehistory.delete_last_time(popup=True)
     Widget:
-        size_hint: 0.15, None
+        size_hint: 0.1, None
 
 
 <DeleteTimePopup@Popup>:
@@ -352,7 +353,7 @@
                 CubeDisplay:
                     id: cubedisplay
                     size_hint: 0.66, None
-                    height: '200dp'
+                    height: '150dp'
 
             TimeDisplay:
                 time_text_ratio: 0.38
