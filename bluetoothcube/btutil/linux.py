@@ -20,7 +20,10 @@ class DeviceInfo:
 
 def sigint_handler(sig, frame):
     print("SIGINT, terminating...")
-    App.get_running_app().stop()
+
+    # We could use app.stop(), but that triggers the on_stop event twice due to
+    # a bug in kivy. See https://github.com/kivy/kivy/issues/2397
+    kivy.base.stopTouchApp()
 
 
 # Searches for a bluetooth cube.

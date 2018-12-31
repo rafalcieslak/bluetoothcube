@@ -55,10 +55,21 @@ class BluetoothCubeApp(App):
         # When the app starts, start a scan.
         Clock.schedule_once(lambda td: self.start_scan(), 1)
 
+        # When the app starts, load time history from file.
+        Clock.schedule_once(
+            lambda td:
+            self.timehistory.use_file(
+                os.path.join(self.user_data_dir, "times.txt")), 1)
+
     def build(self):
         return BluetoothCubeRoot()
 
     def on_stop(self):
+        print("Stopping application")
+
+        # Save time history.
+        self.timehistory.persist()
+
         # Make sure to disassociate the cube when closing the app.
         # Otherwise other devices won't connect.
         if self.cube_connection:

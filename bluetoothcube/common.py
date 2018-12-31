@@ -1,15 +1,35 @@
+import json
+import datetime
+
+from bluetoothcube.utils import datetime_from_isoformat
+
+
 class Time:
-    def __init__(self, time):
+    def __init__(self, time, meta=None):
+        self.dnf = False
+        self.p2 = False
+        self.meta = meta
+        self.ts = datetime.datetime.utcnow()
         if isinstance(time, float):
-            self.dnf = False
-            self.p2 = False
             self.time = time
         elif time == 'DNF':
-            self.dnf = True
-            self.p2 = False
             self.time = None
+        elif isinstance(time, str):
+            # Parse from string.
+            ts, time, meta = time.split('|', 2)
+            self.ts = datetime_from_isoformat(ts)
+            if time == 'DNF':
+                self.time = None
+            else:
+                if time[-1] == "+":
+                    self.p2 = True
+                    time = time[:-1]
+                self.time = float(time)
         else:
-            raise ValueError(f"Invalid time {str(time)}")
+            print(f"ERROR: Invalid time {str(time)}")
+
+        if self.time is None:
+            self.dnf = True
 
     def is_dnf(self) -> bool:
         return self.dnf
@@ -55,3 +75,7 @@ class Time:
         if self.dnf:
             return 'DNF'
         return f"{self.time:.02f}" + ("" if not self.p2 else "+")
+
+    def save(self) -> str:
+        return (self.ts.isoformat() + "|" + str(self) + "|" +
+                json.dumps(self.meta))

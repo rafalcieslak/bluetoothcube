@@ -1,6 +1,8 @@
+import os
 import kivy
 
 from kivy.factory import Factory
+from kivy.clock import Clock
 
 from bluetoothcube.common import Time
 
@@ -99,6 +101,36 @@ class TimeHistory(kivy.event.EventDispatcher):
             self.update_last_time()
             self.update_recent_times()
             self.dispatch('on_time_invalidated')
+
+    def use_file(self, filepath):
+        # Load data from file.
+        self.data = []
+        self.filepath = filepath
+        try:
+            with open(filepath, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    self.data.append(Time(line))
+        except Exception as e:
+            # TODO: Backup the previous file, if it exists. Otherwise we'll
+            # overwrite it with empty data on the next persist().
+            print(f"Failed to load times from {filepath}: {str(e)}")
+
+        self.update_averages()
+        self.update_last_time()
+        self.update_recent_times()
+
+        # Auto-save every 5 minutes.
+        Clock.schedule_interval(lambda td: self.persist(), 60*5)
+
+    def persist(self):
+        print(f"Persisting time history to {self.filepath}")
+        try:
+            with open(self.filepath, 'w') as f:
+                for time in self.data:
+                    f.write(time.save() + "\n")
+        except Exception as e:
+            print(f"Failed to save times to {self.filepath}: {str(e)}")
 
     def on_time_invalidated(self, *args):
         pass
