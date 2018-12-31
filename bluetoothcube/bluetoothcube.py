@@ -1,5 +1,6 @@
 import kivy
 
+from kivy.clock import Clock
 from kociemba.pykociemba.color import color_keys
 
 from bluetoothcube.cubestate import CubieCube, MOVES_GIIKER_TO_KOCIEMBA
@@ -118,4 +119,57 @@ class BluetoothCube(kivy.event.EventDispatcher):
         pass
 
     def on_move_merged(self, *args):
+        pass
+
+
+# Listens for cube moves, tries to detect when the user has finished manually
+# scrambling the cube, and emits a signal when that happens.
+class ScrambleDetector(kivy.event.EventDispatcher):
+    # TODO: These constants should be customizable
+    MIN_LENGTH = 30
+    DELAY = 3.0
+
+    def __init__(self, cube: BluetoothCube) -> None:
+        self.register_event_type('on_manual_scramble_finished')
+        super().__init__()
+
+        self.cube = cube
+        self.cube.bind(
+            solved=self.on_solved,
+            on_move_raw=self.on_move_raw)
+
+        self.is_solved = False
+        self.mid_scramble = False
+        self.scramble_length = 0
+
+        self.scramble_delay_schedule = None
+
+    def on_solved(self, cube: BluetoothCube, solved: bool) -> None:
+        if solved:
+            self.is_solved = True
+            self.mid_scramble = False
+            self.scramble_length = 0
+
+    def on_move_raw(self, cube: BluetoothCube, move: Move) -> None:
+        if self.is_solved and not cube.solved:
+            # First move.
+            self.is_solved = False
+            self.mid_scramble = True
+        if self.mid_scramble:
+            self.scramble_length += 1
+            if self.scramble_delay_schedule:
+                Clock.unschedule(self.scramble_delay_schedule)
+            self.scramble_delay_schedule = Clock.schedule_once(
+                lambda td: self.on_scramble_stopped(), self.DELAY)
+
+    def on_scramble_stopped(self):
+        # User did not make a move for DELAY seconds.
+        self.mid_scramble = False
+        if self.scramble_length > self.MIN_LENGTH:
+            # TODO: Use kociemba solver to discard scrambles where very short
+            # solution exists.
+            print("SCRAMBLED!!!")
+            self.dispatch('on_manual_scramble_finished')
+
+    def on_manual_scramble_finished(self, *args):
         pass

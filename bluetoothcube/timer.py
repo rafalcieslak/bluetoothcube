@@ -25,7 +25,6 @@ class Timer(kivy.event.EventDispatcher):
     def prime(self):
         if self.primed or self.running:
             return
-        print("Priming timer")
         self.primed = True
 
     def unprime(self):

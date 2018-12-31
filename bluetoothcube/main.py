@@ -10,7 +10,7 @@ import kociemba
 from bluetoothcube.btutil import (
     BluetoothCubeScanner, BluetoothCubeConnection)
 
-from bluetoothcube.bluetoothcube import BluetoothCube
+from bluetoothcube.bluetoothcube import BluetoothCube, ScrambleDetector
 from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
 from bluetoothcube.timer import Timer
 from bluetoothcube.timehistory import TimeHistory
@@ -47,6 +47,10 @@ class BluetoothCubeApp(App):
 
         self.timer = Timer(self.cube)
         self.timer.bind(on_new_time=self.on_new_time)
+
+        self.scrambledetector = ScrambleDetector(self.cube)
+        self.scrambledetector.bind(
+            on_manual_scramble_finished=lambda sd: self.autoprime())
 
         # When the app starts, start a scan.
         Clock.schedule_once(lambda td: self.start_scan(), 1)
@@ -185,3 +189,8 @@ class BluetoothCubeApp(App):
         solution_popup = Factory.SolutionPopup()
         solution_popup.ids["solution_label"].text = solution
         solution_popup.open()
+
+    def autoprime(self):
+        if not self.timer.running and not self.timer.primed:
+            print("Autoprime.")
+            self.timer.prime()
