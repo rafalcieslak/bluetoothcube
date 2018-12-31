@@ -42,6 +42,10 @@ EOK = ['UR', 'UF', 'UL', 'UB',
        'FR', 'FL', 'BL', 'BR']
 
 
+# Translates Giiker move IDs to pykociemba
+MOVES_GIIKER_TO_KOCIEMBA = [None, 5, 3, 4, 0, 1, 2]
+
+
 # Extend CubieCube implementation with our custom mechanisms.
 class CubieCube(KCubieCube):
     def __init__(self, **kwargs):
