@@ -139,14 +139,16 @@ class BluetoothCubeConnection(kivy.event.EventDispatcher):
 
         self.disconnect()
 
-        pycallback = BluetoothCubeScanner.gattCallback(
+        # Store pycallback in self to make sure it does not get
+        # garbage-collected while it's in use by Java.
+        self.pycallback = BluetoothCubeScanner.gattCallback(
             self.on_gatt_connection_state_change,
             self.on_gatt_services_discovered,
             self.on_gatt_descriptor_write,
             self.on_gatt_characteristic_changed
         )
         bg = autoclass('org/cielak/bluetoothcube/BluetoothGattImplem')()
-        bg.setCallback(pycallback)
+        bg.setCallback(self.pycallback)
 
         self.gatt = self.device.connectGatt(app_context, False, bg)
         self.connected = False
