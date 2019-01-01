@@ -82,7 +82,7 @@ CFOP_CROSS = generate_variants_from_f(compile_pattern("""
       . . .
 """))
 
-CFOP_2FL = generate_variants_from_f(compile_pattern("""
+CFOP_F2L = generate_variants_from_f(compile_pattern("""
       U U U
       U U U
       . . .

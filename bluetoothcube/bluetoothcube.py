@@ -86,13 +86,24 @@ class BluetoothCube(kivy.event.EventDispatcher):
         move = Move(face, dir)
         self.move_history_raw.append(move)
 
-        s = '  '.join(self.cube_state.get_representation_strings())
-        print(f"{s}  {move}")
+        # s = '  '.join(self.cube_state.get_representation_strings())
+        # print(f"{s}  {move}")
 
         self.dispatch('on_state_changed', self.cube_state)
         self.dispatch('on_move_raw', move)
 
         self.add_move_to_rich_history(move)
+
+        # Temporarily, for debugging purposes, display CFOP state analysis.
+        from bluetoothcube.patterns import (
+            CFOP_CROSS, CFOP_F2L, CFOP_OLL, CFOP_PLL)
+        facecube = self.cube_state.toFaceCube()
+        cfop_cross = facecube.matches_any(CFOP_CROSS)
+        cfop_f2l = cfop_cross and facecube.matches_any(CFOP_F2L)
+        cfop_oll = cfop_f2l and facecube.matches_any(CFOP_OLL)
+        cfop_pll = cfop_oll and facecube.matches_any(CFOP_PLL)
+        print(f"CROSS: {cfop_cross}, F2L: {cfop_f2l}, "
+              f"OLL: {cfop_oll}, PLL: {cfop_pll}")
 
     def add_move_to_rich_history(self, move: Move):
         if len(self.move_history_merged) < 1:

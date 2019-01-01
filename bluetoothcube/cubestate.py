@@ -2,6 +2,7 @@ import kociemba.pykociemba as kociemba
 from kociemba.pykociemba.cubiecube import CubieCube as KCubieCube
 from kociemba.pykociemba.facecube import FaceCube as KFaceCube
 
+from typing import List
 
 # CPP permutation transforms corners from giiker coords to kociemba
 # coords. ICPP is the inverse permutation
@@ -138,6 +139,11 @@ class CubieCube(KCubieCube):
                 ' '.join(str(ep) for ep in self.ep),
                 ' '.join(str(eo) for eo in self.eo), ]
 
+    def toFaceCube(self):
+        facecube = super().toFaceCube()
+        # Return our custom facecube subclass
+        return FaceCube(facecube.f)
+
 
 class FaceCube(KFaceCube):
     SOLVED_PATTERN = "U"*9 + "L"*9 + "F"*9 + "R"*9 + "B"*9 + "D"*9
@@ -234,3 +240,15 @@ L L L F F F R R R B B B
                 res += kociemba.color.color_keys[i]
             faces[ch] = faces[ch][1:]
         return res
+
+    def matches_any(self, patterns: List['FaceCube']) -> bool:
+        for pattern in patterns:
+            if self.matches(pattern):
+                return True
+        return False
+
+    def matches(self, pattern: 'FaceCube') -> bool:
+        for x, p in zip(self.f, pattern.f):
+            if p != -1 and x != p:
+                return False
+        return True

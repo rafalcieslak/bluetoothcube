@@ -82,14 +82,13 @@ class BluetoothCubeApp(App):
         return BluetoothCubeRoot()
 
     def on_stop(self):
-        print("Stopping application")
-
         # Save time history.
         self.timehistory.persist()
 
         # Make sure to disassociate the cube when closing the app.
         # Otherwise other devices won't connect.
         if self.cube_connection:
+            print("Terminating connection...")
             self.cube_connection.disconnect()
 
     def start_scan(self):
