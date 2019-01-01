@@ -111,12 +111,6 @@ class CubeButton(AnchorLayout):
     button = kivy.properties.ObjectProperty(None)
 
 
-# TODO: This class could be defined inline in kv
-class DisconnectButton(Button, Hideable):
-    def on_press(self):
-        App.get_running_app().disconnect_cube()
-
-
 class CubeStateDisplay(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

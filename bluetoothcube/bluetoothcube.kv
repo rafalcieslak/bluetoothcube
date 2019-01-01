@@ -306,12 +306,13 @@
                     connecting_cancelbutton: connecting_cancelbutton
                     height: connecting_cancelbutton.height
                     anchor_y: 'bottom'
-                    DisconnectButton:
+                    Button:
                         id: connecting_cancelbutton
                         size_hint: None, None
                         text: "Cancel"
                         font_size: '20sp'
-                        size: self.texture_size[0] + dp(30), self.texture_size[1] + dp(30),
+                        size: self.texture_size[0] + dp(30), self.texture_size[1] + dp(30)
+                        on_release: app.disconnect_cube()
 
 
     Screen:
@@ -331,10 +332,11 @@
                 orientation: 'horizontal'
                 size_hint: 1, None
                 height: '40dp'
-                DisconnectButton:
+                Button:
                     id: disconnectbutton
                     size_hint: 0.33, 1
                     text: "Disconnect cube"
+                    on_release: app.disconnect_cube()
                 Button:
                     size_hint: 0.33, 1
                     text: "Reset cube"
@@ -343,6 +345,23 @@
                     size_hint: 0.33, 1
                     text: "Solve"
                     on_release: app.solve()
+
+            # BoxLayout:
+            #     orientation: 'horizontal'
+            #     size_hint: 1, None
+            #     height: '40dp'
+            #     Button:
+            #         size_hint: 0.33, 1
+            #         text: "Export history"
+            #         on_release: app.export_history()
+            #     Button:
+            #         size_hint: 0.33, 1
+            #         text: "Import history"
+            #         on_release: app.import_history()
+            #     # Button:
+            #     #     size_hint: 0.33, 1
+            #     #     text: "Solve"
+            #     #     on_release: app.solve()
 
             BoxLayout:
                 size_hint: 1, None
