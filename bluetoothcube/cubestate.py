@@ -1,3 +1,4 @@
+import kociemba.pykociemba as kociemba
 from kociemba.pykociemba.cubiecube import CubieCube as KCubieCube
 from kociemba.pykociemba.facecube import FaceCube as KFaceCube
 
@@ -139,9 +140,97 @@ class CubieCube(KCubieCube):
 
 
 class FaceCube(KFaceCube):
+    SOLVED_PATTERN = "U"*9 + "L"*9 + "F"*9 + "R"*9 + "B"*9 + "D"*9
+
+    PRETTY_PATTERN = """\
+      U U U
+      U U U
+      U U U
+L L L F F F R R R B B B
+L L L F F F R R R B B B
+L L L F F F R R R B B B
+      D D D
+      D D D
+      D D D\
+"""
+    ROT_CLOCKWISE = [6, 3, 0, 7, 4, 1, 8, 5, 2]
+    ROT_ACLOCKWISE = [2, 5, 8, 1, 4, 7, 0, 3, 6]
+    ROTATIONS = {
+        "x":  {'R': '+', 'L': '-', 'U': 'F', 'B': 'U++', 'D': 'B++', 'F': 'D'},
+        "x'": {'R': '-', 'L': '+', 'U': 'B++', 'B': 'D++', 'D': 'F', 'F': 'U'},
+        "y": {'U': '+', 'D': '-', 'L': 'F', 'F': 'R', 'R': 'B', 'B': 'L'},
+        "y'": {'U': '-', 'D': '+', 'L': 'B', 'F': 'L', 'R': 'F', 'B': 'R'},
+        "z": {'F': '+', 'B': '-', 'R': 'U+', 'U': 'L+', 'L': 'D+', 'D': 'R+'},
+        "z'": {'F': '-', 'B': '+', 'R': 'D-', 'U': 'R-', 'L': 'U-', 'D': 'L-'},
+    }
+
+    def __init__(self, data=None):
+        # This custom constructor additionally accepts a list of colors.
+        if not data:
+            super().__init__()
+        elif isinstance(data, str):
+            super().__init__(data)
+        elif isinstance(data, list):
+            x = data[0]
+            if isinstance(x, str):
+                self.f = [kociemba.color.colors.get(i, -1) for i in data]
+            else:
+                self.f = data
+        else:
+            raise NotImplementedError()
+
     def is_solved(self):
         return self.f == ([0]*9 + [1]*9 + [2]*9 + [3]*9 + [4]*9 + [5]*9)
 
     def get_representation_strings(self):
         s = self.to_String()
         return [s[i:i + 9] for i in range(0, 6*9, 9)]
+
+    def get_face(self, f):
+        i = kociemba.color.colors[f] * 9
+        return self.f[i:i+9]
+
+    # TODO: This method deserves some unit-tests.
+    def rotated(self, r: str, normalize_colors=True) -> 'FaceCube':
+        # TODO: Accept compound rotations, like zx'y.
+
+        faces = {f: self.get_face(f) for f in "URFDLB"}
+        rotation = self.ROTATIONS[r]
+
+        def process_face(face, rules):
+            for rule in rules:
+                if rule in "URFDLB":
+                    face = faces[rule]
+                elif rule == '+':
+                    face = [face[self.ROT_CLOCKWISE[i]] for i in range(0, 9)]
+                elif rule == '-':
+                    face = [face[self.ROT_ACLOCKWISE[i]] for i in range(0, 9)]
+                else:
+                    raise ValueError("Invalid face rule: {rule}")
+            return face
+
+        new_faces = sum(
+            (process_face(faces[f], rotation[f]) for f in "URFDLB"),
+            [])
+
+        if normalize_colors:
+            # Rename colors so that U center is at U face etc.
+            color_map = {new_faces[f*9 + 4]: f for f in range(0, 6)}
+            new_faces = [color_map[i] if i >= 0 else i for i in new_faces]
+
+        return FaceCube(new_faces)
+
+    def pretty_str(self) -> str:
+        faces = {f: self.get_face(f) for f in "URFDLB"}
+        res = ""
+        for ch in self.PRETTY_PATTERN:
+            if ch not in "URFDLB":
+                res += ch
+                continue
+            i = faces[ch][0]
+            if i == -1:
+                res += "."
+            else:
+                res += kociemba.color.color_keys[i]
+            faces[ch] = faces[ch][1:]
+        return res
