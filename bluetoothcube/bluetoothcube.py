@@ -94,17 +94,6 @@ class BluetoothCube(kivy.event.EventDispatcher):
 
         self.add_move_to_rich_history(move)
 
-        # Temporarily, for debugging purposes, display CFOP state analysis.
-        from bluetoothcube.patterns import (
-            CFOP_CROSS, CFOP_F2L, CFOP_OLL, CFOP_PLL)
-        facecube = self.cube_state.toFaceCube()
-        cfop_cross = facecube.matches_any(CFOP_CROSS)
-        cfop_f2l = cfop_cross and facecube.matches_any(CFOP_F2L)
-        cfop_oll = cfop_f2l and facecube.matches_any(CFOP_OLL)
-        cfop_pll = cfop_oll and facecube.matches_any(CFOP_PLL)
-        print(f"CROSS: {cfop_cross}, F2L: {cfop_f2l}, "
-              f"OLL: {cfop_oll}, PLL: {cfop_pll}")
-
     def add_move_to_rich_history(self, move: Move):
         if len(self.move_history_merged) < 1:
             self.move_history_merged.append(move)
@@ -119,7 +108,7 @@ class BluetoothCube(kivy.event.EventDispatcher):
         # Trim the moves list to last 50 moves.
         self.move_history_merged = self.move_history_merged[-50:]
 
-        print(Move.list_to_str(self.move_history_merged))
+        # print(Move.list_to_str(self.move_history_merged))
 
         self.dispatch('on_move_merged', new_moves[-1])
 
