@@ -4,6 +4,8 @@ import kivy
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.factory import Factory
+from kivy.metrics import Metrics
+from kivy.core.window import Window
 
 import kociemba
 
@@ -15,14 +17,17 @@ from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
 from bluetoothcube.timer import Timer
 from bluetoothcube.timehistory import TimeHistory
 
+
 if kivy.platform == "linux":
+    # Some configuration specific to the desktop (windowed) version of the app.
+
+    # Kivy does not detect DPI on linux, it's hardcoded to 96. Which is
+    # bonkers, one of the primary reasons why people use kivy is because it
+    # correctly scales interfaces and layouts.
+    # TODO: Detect and configure DPI.
+
+    # Disable right-click simulation for multi-touch.
     kivy.config.Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
-    # If using default window size...
-    if kivy.Config.get('graphics', 'width') == '800' \
-       and kivy.Config.get('graphics', 'height') == '600':
-        # Switch to a nicer shape
-        kivy.config.Config.set('graphics', 'width', '660')
-        kivy.config.Config.set('graphics', 'height', '1000')
 
 
 class BluetoothCubeApp(App):
@@ -30,6 +35,21 @@ class BluetoothCubeApp(App):
 
     def __init__(self):
         super(BluetoothCubeApp, self).__init__()
+
+        if kivy.platform == "linux":
+            # Some configuration specific to the desktop (windowed) version of the app.
+
+            # If using default window size...
+            if Window.size == (800, 600):
+                print("Default window size, switching to custom")
+                # Switch to a nicer shape
+                width, height = 540, 960  # FHD/2 portait
+                # if Metrics.density >= 2:
+                #     width, height = width * 2, height * 2
+                Window.size = (width, height)
+
+        print(f"Density: {Metrics.density}")
+        print(f"DPI: {Metrics.dpi}")
 
         self.cube_scanner = BluetoothCubeScanner()
         self.cube_scanner.bind(
