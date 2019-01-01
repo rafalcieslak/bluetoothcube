@@ -44,12 +44,9 @@ class BluetoothCubeApp(App):
                 print("Default window size, switching to custom")
                 # Switch to a nicer shape
                 width, height = 540, 960  # FHD/2 portait
-                # if Metrics.density >= 2:
-                #     width, height = width * 2, height * 2
+                if Metrics.density >= 2:
+                    width, height = width * 2, height * 2
                 Window.size = (width, height)
-
-        print(f"Density: {Metrics.density}")
-        print(f"DPI: {Metrics.dpi}")
 
         self.cube_scanner = BluetoothCubeScanner()
         self.cube_scanner.bind(

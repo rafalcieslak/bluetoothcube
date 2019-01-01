@@ -393,12 +393,12 @@
                 size_hint: 1, None
                 id: primebutton
                 text: "Prime" if not app.timer.primed else "Disarm"
-                font_size: max(dp(40), mm(8))
+                font_size: dp(40)
                 height: self.font_size + dp(15)
 
             TimerButton:
                 size_hint: 1, None
                 id: timerbutton
                 text: "Start" if not app.timer.running else "Stop"
-                font_size: max(dp(40), mm(8))
+                font_size: dp(40)
                 height: self.font_size + dp(15)
