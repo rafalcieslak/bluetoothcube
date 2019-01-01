@@ -7,7 +7,7 @@ Built with Python3.7.
 
 ### Linux
 
-To run locally on a Linux machine, use `python3 -m main`.
+To run locally on a Linux machine, install python requirements from `requirements-linux.txt` file, then use `python3 -m main`.
 
 ### Android
 
