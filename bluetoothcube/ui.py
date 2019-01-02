@@ -68,15 +68,19 @@ class TimeDisplay(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.updateevent = None
+
         app = App.get_running_app()
-        app.timer.bind(
+
+        self.timer = app.timer
+        self.timehistory = app.timehistory
+
+        self.timer.bind(
             running=self.on_timer_running_changed,
             primed=lambda timer, primed: self.update_bg_color()
         )
-        app.timehistory.bind(
-            on_time_invalidated=lambda w: self.clear())
-
-        self.timer = app.timer
+        self.timehistory.bind(
+            last_time=lambda th, lt: self.update_display(),
+            on_time_invalidated=lambda th: self.clear())
 
     def on_timer_running_changed(self, timer, running):
         if running:
@@ -87,8 +91,16 @@ class TimeDisplay(Label):
         self.update_display()
 
     def update_display(self):
-        v = self.timer.get_time()
-        precision = 1 if self.timer.running else 2
+        if self.timer.running:
+            v = self.timer.get_time()
+            precision = 1
+        else:
+            if self.timehistory.last_time:
+                v = self.timehistory.last_time.time
+            else:
+                v = 0
+            precision = 2
+
         self.text = f"{v:0.{precision}f}"
 
         if v >= 100:
@@ -104,6 +116,57 @@ class TimeDisplay(Label):
 
     def clear(self):
         self.text = "0.0"
+
+
+# TODO: This widget is now a bare Label - we could make it richer by using a
+# Grid and utilizing partial updates.
+class AnalysisDisplay(Label):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.analyzer = App.get_running_app().analyzer
+        self.timer = App.get_running_app().timer
+        self.timehistory = App.get_running_app().timehistory
+
+        self.analyzer.bind(
+            current_stage=lambda a, cs: self.update_display())
+        self.timer.bind(
+            on_solve_started=self.on_solve_started,
+            on_solve_ended=self.on_solve_ended,
+            running=lambda t, r: self.update_display())
+        self.timehistory.bind(
+            last_time=lambda th, lt: self.update_display())
+
+        self.updateevent = None
+        self.update_display()
+
+    def on_solve_started(self, timer):
+        self.updateevent = Clock.schedule_interval(
+            lambda dt: self.update_display(), 0.1)
+
+    def on_solve_ended(self, timer):
+        if self.updateevent:
+            Clock.unschedule(self.updateevent)
+
+    def update_display(self):
+        text = f"Using {self.analyzer.method} analyzer.\n"
+
+        if self.timer.running:
+            stages = self.analyzer.get_stage_times()
+        else:
+            lt = self.timehistory.last_time
+            if lt and lt.meta and 'stage_times' in lt.meta:
+                text += "Last solve:\n"
+                stages = lt.meta['stage_times']
+            else:
+                stages = []
+
+        for i, v in enumerate(stages):
+            stage_name, t = v
+            precision = 1 if i+1 == len(stages) else 2
+            text += f"[b]{stage_name}[/b]: {t:.0{precision}f}\n"
+
+        self.text = text
 
 
 # Created dynamically as cubes are discovered.

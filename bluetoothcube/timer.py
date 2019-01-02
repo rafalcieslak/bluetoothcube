@@ -17,6 +17,7 @@ class Timer(kivy.event.EventDispatcher):
 
         self.start_time = None
         self.end_time = None
+        self.measured_time = 0
 
         self.cube = cube
 
@@ -43,8 +44,8 @@ class Timer(kivy.event.EventDispatcher):
         if self.running:
             return
         self.unprime()
-        self.measured_time = 0.0
         self.start_time = time.time()
+        self.measured_time = 0
         self.running = True
 
         # TODO: This event should probably originate in some other class.
@@ -52,9 +53,6 @@ class Timer(kivy.event.EventDispatcher):
 
     def get_time(self) -> float:
         if not self.running:
-            # TODO: This should return 0. It is not timer's job to remember the
-            # last time. The timedisplay should ask timehistory for the last
-            # time instead.
             return self.measured_time
         return time.time() - self.start_time
 

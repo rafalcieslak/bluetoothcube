@@ -4,6 +4,19 @@ import datetime
 from bluetoothcube.utils import datetime_from_isoformat
 
 
+# Function for upgrading time metadata format between releases.
+def correct_meta(meta):
+    if not meta:
+        return None
+
+    if 'stage_times' in meta:
+        if isinstance(meta['stage_times'], dict):
+            # Drop old stage times format.
+            del meta['stage_times']
+
+    return meta
+
+
 class Time:
     def __init__(self, time, meta=None):
         self.dnf = False
@@ -16,7 +29,8 @@ class Time:
             self.time = None
         elif isinstance(time, str):
             # Parse from string.
-            ts, time, meta = time.split('|', 2)
+            ts, time, rest = time.split('|', 2)
+            meta = json.loads(rest)
             self.ts = datetime_from_isoformat(ts)
             if time == 'DNF':
                 self.time = None
@@ -25,7 +39,10 @@ class Time:
                     self.p2 = True
                     time = time[:-1]
                 self.time = float(time)
-            self.meta = meta
+
+            # TODO: Mark file versions and only use this procedure when loading
+            # an old file version.
+            self.meta = correct_meta(meta)
         else:
             print(f"ERROR: Invalid time {str(time)}")
 

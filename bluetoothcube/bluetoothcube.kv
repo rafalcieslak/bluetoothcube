@@ -237,6 +237,12 @@
                 font_size: '25sp'
                 on_release: root.dismiss()
 
+<AnalysisDisplay>:
+    text_size: self.size
+    valign: 'top'
+    halign: 'left'
+    markup: True
+    font_size: '20dp'
 
 <BluetoothCubeRoot>:
     cubelist: cubelist
@@ -367,12 +373,12 @@
                 size_hint: 1, None
                 orientation: 'horizontal'
                 height: cubedisplay.height
-                # CubeStateDisplay:  # Disabled, no longer necessary with proper cube display
-                #     size_hint: 0.33, 1
                 CubeDisplay:
                     id: cubedisplay
-                    size_hint: 0.66, None
+                    size_hint: 0.5, None
                     height: '150dp'
+                AnalysisDisplay:
+                    size_hint: 0.5, 1
 
             TimeDisplay:
                 time_text_ratio: 0.38
@@ -380,10 +386,10 @@
                 font_size: min(self.width * self.time_text_ratio, self.height * 0.7)
                 text: "0.0"
 
-            LastTime:
+            BasicStatsDisplay:
                 size_hint: 1, None
 
-            BasicStatsDisplay:
+            LastTime:
                 size_hint: 1, None
 
             RecentTimes:

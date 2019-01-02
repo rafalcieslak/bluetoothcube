@@ -3,7 +3,7 @@ import kivy
 from bluetoothcube.patterns import (
     CFOP_CROSS, CFOP_F2L, CFOP_OLL, CFOP_PLL)
 
-from typing import Dict
+from typing import Dict, List, Tuple
 
 STAGES = {
     'CFOP': [
@@ -51,7 +51,7 @@ class Analyzer(kivy.event.EventDispatcher):
         self.detect_stage_changes()
 
     def on_solve_started(self, timer):
-        print("CFOP analyzer started")
+        # print("CFOP analyzer started")
         self.current_stage = 0
         self.times = {}
         self.stage_start_time = 0
@@ -59,6 +59,10 @@ class Analyzer(kivy.event.EventDispatcher):
         self.detect_stage_changes()
 
     def on_state_changed(self, cube, newstate):
+        if not self.timer.running:
+            # Do not track state changes whilst the timer is stopped. We're not
+            # interested in these.
+            return
         self.detect_stage_changes()
 
     def detect_stage_changes(self):
@@ -70,7 +74,7 @@ class Analyzer(kivy.event.EventDispatcher):
         if self.cube.cube_state.toFaceCube().matches_any(target_pattern):
             current_time = self.timer.get_time()
             stage_time = current_time - self.stage_start_time
-            print(f"{stage_name} completed in {stage_time:.02f}.")
+            # print(f"{stage_name} completed in {stage_time:.02f}.")
 
             self.times[stage_name] = stage_time
             self.stage_start_time = current_time
@@ -91,9 +95,24 @@ class Analyzer(kivy.event.EventDispatcher):
                 # Still not completed? Maybe the timer was stopped manually.
                 print("Solve analysis invalid, timer was stopped before all "
                       "stages were completed.")
-                self.current_stage = len(self.stages - 1)
+                self.current_stage = len(self.stages) - 1
                 self.times = {}
                 return
 
-    def get_stage_times(self):
-        return self.times
+    def get_stage_times(self) -> List[Tuple[str, float]]:
+        res: List[Tuple[str, float]] = []
+        for i in range(0, self.current_stage + 1):
+            stage_name, _ = self.stages[i]
+            if stage_name == 'DONE':
+                return res
+            if i == self.current_stage:
+                time = self.get_current_stage_time()
+            elif stage_name not in self.times:
+                return res
+            else:
+                time = self.times[stage_name]
+            res.append((stage_name, time))
+        return res
+
+    def get_current_stage_time(self) -> float:
+        return self.timer.get_time() - self.stage_start_time
