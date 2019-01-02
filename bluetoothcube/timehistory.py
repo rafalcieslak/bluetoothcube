@@ -26,6 +26,7 @@ class TimeHistory(kivy.event.EventDispatcher):
         self.register_event_type('on_time_invalidated')
         super().__init__()
         self.data = []
+        self.filepath = None
 
     def add_time(self, time: Time):
         self.data.append(time)
@@ -124,6 +125,9 @@ class TimeHistory(kivy.event.EventDispatcher):
         Clock.schedule_interval(lambda td: self.persist(), 60*5)
 
     def persist(self):
+        if not self.filepath:
+            return
+
         print(f"Persisting time history to {self.filepath}")
         try:
             with open(self.filepath, 'w') as f:

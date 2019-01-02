@@ -16,7 +16,7 @@ from bluetoothcube.bluetoothcube import BluetoothCube, ScrambleDetector
 from bluetoothcube.ui import CubeButton, BluetoothCubeRoot
 from bluetoothcube.timer import Timer
 from bluetoothcube.timehistory import TimeHistory
-from bluetoothcube.solveanalyzers import CFOPAnalyzer
+from bluetoothcube.solveanalyzers import Analyzer
 
 
 if kivy.platform == "linux":
@@ -70,7 +70,7 @@ class BluetoothCubeApp(App):
         self.scrambledetector.bind(
             on_manual_scramble_finished=lambda sd: self.autoprime())
 
-        self.analyzer = CFOPAnalyzer(self.cube, self.timer)
+        self.analyzer = Analyzer(self.cube, self.timer)
         self.timer.use_analyzer(self.analyzer)
 
         # When the app starts, start a scan.
