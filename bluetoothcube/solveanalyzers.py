@@ -23,7 +23,9 @@ class CFOPAnalyzer(kivy.event.EventDispatcher):
         self.timer = timer
 
         self.cube.bind(on_state_changed=self.on_state_changed)
-        self.timer.bind(on_solve_started=self.on_solve_started)
+        self.timer.bind(
+            on_solve_started=self.on_solve_started,
+            on_solve_ended=self.on_solve_ended)
 
         self.times: Dict[CFOPAnalyzer.Stage, float] = {}
         self.stage_start_time = 0
@@ -33,15 +35,20 @@ class CFOPAnalyzer(kivy.event.EventDispatcher):
         self.current_stage = self.STAGES[0]
         self.times = {}
         self.stage_start_time = 0
+        # Maybe some stages are already complete?
+        self.detect_stage_changes()
 
     def on_state_changed(self, cube, newstate):
+        self.detect_stage_changes()
+
+    def detect_stage_changes(self):
         # Advance to next state if target condition is met.
         target_pattern = self.STAGE_COMPLETION_CONDITIONS.get(
             self.current_stage, None)
         if not target_pattern:
             return
 
-        if newstate.toFaceCube().matches_any(target_pattern):
+        if self.cube.cube_state.toFaceCube().matches_any(target_pattern):
             current_time = self.timer.get_time()
             stage_time = current_time - self.stage_start_time
             print(f"{self.current_stage} completed in {stage_time:.02f}.")
@@ -52,8 +59,21 @@ class CFOPAnalyzer(kivy.event.EventDispatcher):
             self.current_stage = self.STAGES[
                 1 + self.STAGES.index(self.current_stage)]
 
-        if self.current_stage == 'DONE':
-            print(self.times)
+            # Retry - maybe we've advanced more than one stage in one turn?
+            self.detect_stage_changes()
 
-    def complete(self):
-        pass
+    def on_solve_ended(self, timer):
+        if self.current_stage != 'DONE':
+            # Give one more chance for state transition.
+            self.detect_stage_changes()
+
+            if self.current_stage != 'DONE':
+                # Still not completed? Maybe the timer was stopped manually.
+                print("Solve analysis invalid, timer was stopped before all "
+                      "stages were completed.")
+                self.current_stage = 'INVALID'
+                self.times = {}
+                return
+
+    def get_stage_times(self):
+        return self.times

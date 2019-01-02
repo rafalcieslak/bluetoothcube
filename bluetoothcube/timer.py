@@ -11,6 +11,7 @@ class Timer(kivy.event.EventDispatcher):
 
     def __init__(self, cube):
         self.register_event_type('on_solve_started')
+        self.register_event_type('on_solve_ended')
         self.register_event_type('on_new_time')
         super().__init__()
 
@@ -19,9 +20,14 @@ class Timer(kivy.event.EventDispatcher):
 
         self.cube = cube
 
+        self.analyzer = None
+
         self.cube.bind(
             on_state_changed=self.on_cube_state_changed,
             solved=self.on_cube_solved_changed)
+
+    def use_analyzer(self, analyzer):
+        self.analyzer = analyzer
 
     def prime(self):
         if self.primed or self.running:
@@ -58,7 +64,14 @@ class Timer(kivy.event.EventDispatcher):
         self.measured_time = time.time() - self.start_time
         self.running = False
 
-        self.dispatch('on_new_time', Time(self.measured_time))
+        self.dispatch('on_solve_ended')
+
+        new_time = Time(self.measured_time, {
+            'stage_times': self.analyzer.get_stage_times()
+        })
+        print(new_time.meta)
+
+        self.dispatch('on_new_time', new_time)
 
     def on_cube_state_changed(self, cube, newstate):
         if self.primed:
@@ -70,6 +83,9 @@ class Timer(kivy.event.EventDispatcher):
                 self.stop()
 
     def on_solve_started(self):
+        pass
+
+    def on_solve_ended(self):
         pass
 
     def on_new_time(self, time):

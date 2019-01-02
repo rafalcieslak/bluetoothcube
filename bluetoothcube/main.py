@@ -71,6 +71,7 @@ class BluetoothCubeApp(App):
             on_manual_scramble_finished=lambda sd: self.autoprime())
 
         self.analyzer = CFOPAnalyzer(self.cube, self.timer)
+        self.timer.use_analyzer(self.analyzer)
 
         # When the app starts, start a scan.
         Clock.schedule_once(lambda td: self.start_scan(), 1)

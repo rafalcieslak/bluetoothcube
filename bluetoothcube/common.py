@@ -25,6 +25,7 @@ class Time:
                     self.p2 = True
                     time = time[:-1]
                 self.time = float(time)
+            self.meta = meta
         else:
             print(f"ERROR: Invalid time {str(time)}")
 
