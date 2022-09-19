@@ -9,6 +9,7 @@ from bluetoothcube.btutil.const import (
     CUBE_STATE_SERVICE, CUBE_STATE_RESPONSE,
     CUBE_INFO_SERVICE, CUBE_INFO_REQUEST, CUBE_INFO_RESPONSE,
     CUBE_INFO_REQUEST_COMMANDS)
+from ldb import ERR_OBJECT_CLASS_MODS_PROHIBITED
 
 
 class DeviceInfo:
@@ -99,7 +100,7 @@ class BluetoothCubeScanner(kivy.event.EventDispatcher, gatt.DeviceManager):
         name = device.alias()
         print(f"Device found: {name}")
         # TODO: Refactor this condition into a shared file
-        if name and (name.startswith("GiC") or name.startswith("GiS")):
+        if name and (name.startswith("Gi")):
             di = DeviceInfo(device.mac_address, name, self)
             if device.is_connected():
                 self.dispatch('on_paired_cube_found', di)
@@ -222,10 +223,21 @@ class BluetoothCubeConnection(gatt.Device, kivy.event.EventDispatcher):
         if characteristic.uuid == CUBE_STATE_RESPONSE:
             # Dispatch the event from the main event loop, instead of dbus
             # handler to ensure proper error handling.
+            if value[18] == 0xa7:
+                bla=""
+                key = [176, 81, 104, 224, 86, 137, 237, 119, 38, 26, 193, 161, 210, 126, 150, 81, 93, 13, 236, 249, 89, 235, 88, 24, 113, 81, 214, 131, 130, 199, 2, 169, 39, 165, 171, 41]
+                k = value[19]
+                k1 = k >> 4 & 0xf;
+                k2 = k & 0xf;
+                for i in range(0,len(value)-2):
+                    move = (value[i] + key[i + k1] + key[i + k2]) & 0xff;
+                    bla+="{0:02x}".format(move)
+                value=bytes.fromhex(bla)
+
             Clock.schedule_once(
                 lambda td: self.dispatch('on_state_updated', value))
         else:
-            print(f"Characteristic {characteristic.uuid} changed!")
+            print(f"Characteristic {characteristic.uuid} changed to {value}")
 
     def send_command(self, command):
         # TODO: At the moment this method only supports single-byte commands.
